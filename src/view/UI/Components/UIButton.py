@@ -9,9 +9,9 @@ class UIButton(UIObject.UIObject):
     
     hover_surface_effect:pg.Surface
     
-    def __init__(self,surface:pg.Surface,rect:pg.Rect,text:str)->None:
+    def __init__(self,surface:pg.Surface,rect:pg.Rect,text:str,fontSize:int)->None:
         super().__init__(surface,rect)
-        self.setFontSize(25)
+        self.setFontSize(fontSize)
         self.setText(text)
         
         self.hover_surface_effect=pg.Surface(self.surface.get_size(),pg.SRCALPHA).convert_alpha()
