@@ -8,12 +8,10 @@ import src.view.UI.UIObject as UIObject
 import src.view.UI.Components.UIButton as UIButton
 
 class MenuScreen(GameScreen.GameScreen):
-    
-    
-    def __init__(self,rectScreen:pg.Surface):
-        self.rectScreen=rectScreen
+    def __init__(self,screenSurf:pg.Surface):
+        super().__init__(screenSurf)
         buttonSurf = next(item for item in Textures.loadedSurfaces if item["name"]=="blue_button00")["surface"]
-        menuBtn = UIButton.UIButton(pg.Rect(rectScreen.get_rect().center[0],rectScreen.get_rect().center[1],300,100),buttonSurf,"Singleplayer")
+        menuBtn = UIButton.UIButton(buttonSurf,self.screenSurf.get_rect().center,"Singleplayer")
         self.screenBtns.append({"name":"singleplayerBtn","button":menuBtn})
         
     def update(self):

@@ -2,13 +2,13 @@ import pygame as pg
 
 
 class UIObject(pg.sprite.Sprite):
-    rect: pg.Rect
     surface: pg.Surface
-    
-    def __init__(self,rect:pg.Rect,surface:pg.Surface) -> None:
-        self.rect: pg.Rect = rect
-        self.surface: pg.Surface = surface
+    position:pg.Vector2
+    def __init__(self,surface:pg.Surface,position:pg.Vector2) -> None:
+        self.surface: pg.Vector2 = surface
+        self.position=position-pg.Vector2(surface.get_size())/2
+
         pass
     
-    def draw(self,screenSurface:pg.Surface)->None:
-        screenSurface.blit(self.rect,self.surface)
+    def draw(self,drawSurface:pg.Surface)->None:
+        drawSurface.blit(self.surface,self.position)

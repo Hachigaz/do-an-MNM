@@ -5,16 +5,17 @@ import pygame as pg
 class UIButton(UIObject.UIObject):
     text_font:pg.font.Font
     text_surface:pg.Surface
-    text_rect:pg.Rect
-    def __init__(self,rect:pg.Rect,surface:pg.Surface,text:str)->None:
-        super().__init__(rect,surface)
+    text_pos:pg.Vector2
+    def __init__(self,surface:pg.Surface,position:pg.Vector2,text:str)->None:
+        super().__init__(surface,position)
         self.setFontSize(20)
         self.setText(text)
         pass
+    
 
-    def draw(self)->None:
-        super().draw()
-        self.surface.blit(self.text.surface,self.text.rect)
+    def draw(self,drawSurface:pg.Surface)->None:
+        self.surface.blit(self.text_surface,self.text_pos)
+        super().draw(drawSurface)
         pass
     
     def setFontSize(self,size:int):
@@ -22,5 +23,5 @@ class UIButton(UIObject.UIObject):
     
     def setText(self,text:str)->None:
         self.text_surface = self.text_font.render(text,True,pg.Color(255,255,255))
-        self.text_rect = pg.Rect(self.surface.get_rect().center[0],self.surface.get_rect().center[1],self.text_surface.get_rect().width,self.text_surface.get_rect().height)
+        self.text_pos=pg.Vector2(self.surface.get_rect().center)-(pg.Vector2(self.text_surface.get_size())/2)
         
