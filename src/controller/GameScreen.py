@@ -13,7 +13,7 @@ class GameScreen:
     def update(self)->None:
         for item in self.screenBtns:
             button = item["button"]
-            button.draw(self.screenSurf)
+            button.update(self.screenSurf)
             pass
             
         pass
