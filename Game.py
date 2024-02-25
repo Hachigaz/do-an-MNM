@@ -8,10 +8,10 @@ import src.model.GameObject.Textures as Textures
 import pygame as pg
 
 class GameState(Enum):
+    NONE = 0
     MENU = 1
-    SETTING = 2
+    LOBBY = 2    
     INGAME = 3
-    LOBBY = 4
 
 
 class Game:
@@ -25,9 +25,10 @@ class Game:
         self.screen = pg.display.set_mode((1280, 720))
         self.clock = pg.time.Clock()
         
+        self.gameState=GameState.NONE
+        self.gameScreen = None
         
-        self.gameState = GameState.MENU
-        self.gameScreen = MenuScreen.MenuScreen(self.screen)
+        self.setGameState(GameState.MENU)
         
         self.renderLoop()
         pass
@@ -60,3 +61,11 @@ class Game:
     
     def endGame(self)->None:
         pg.quit()
+        
+    def setGameState(self,gameState:GameState):
+        if(self.gameState!=gameState):
+            self.gameState=gameState
+            if(gameState==GameState.MENU):
+                self.gameScreen = MenuScreen.MenuScreen(self.screen)
+            elif(gameState==GameState.MULTIPLAYER):
+                self.gameScreen

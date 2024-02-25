@@ -1,14 +1,25 @@
 import pygame as pg
 
-
+class uiSprite:
+    def __init__(self,surface,rect) -> None:
+        self.surface=surface
+        self.rect=rect
+    
+    def draw(self, drawSurface:pg.Surface):
+        drawSurface.blit(self.surface,self.rect)
+        
 class UIObject(pg.sprite.Sprite):
-    surface: pg.Surface
-    rect:pg.Rect
-    def __init__(self,surface:pg.Surface,rect:pg.Rect) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.surface = pg.transform.scale(surface,rect.size)
-        self.rect=pg.Rect((pg.Vector2(rect.topleft)-pg.Vector2(self.surface.get_size())/2),pg.Vector2(self.surface.get_size()))
+        self.uiSurfaces=[]
+        self.hoverEffects=[]
+        self.disabledEffects=[]
+        self.is_disabled = False
+        self.draw_disabled = False
         pass
     
     def update(self,drawSurface:pg.Surface)->None:
-        drawSurface.blit(self.surface,self.rect)
+        if(not self.draw_disabled):
+            for surface in self.uiSurfaces:
+                surface.draw(drawSurface)
+                

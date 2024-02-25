@@ -16,7 +16,7 @@ uiMapXmlPaths = [
     "resources/ui/Spritesheet/greySheet.xml",
 ]
 
-loadedSurfaces:[{"name":str,"surface":pg.Surface}] = []
+loadedSurfaces = []
 
 def loadTextures()->None:
     for (path,xmlPath) in zip(uiMapPaths,uiMapXmlPaths):
@@ -32,3 +32,6 @@ def loadTextures()->None:
             loadedSurfaces.append({"name":texName,"surface":texSurface.subsurface(texOffset,texSize)})
     
     pass
+
+def getLoadedSurfaces(surfaceName : str):
+    return next(item for item in loadedSurfaces if item["name"]==surfaceName)["surface"]
