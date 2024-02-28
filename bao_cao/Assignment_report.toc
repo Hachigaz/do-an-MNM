@@ -1,0 +1,6 @@
+\contentsline {section}{\numberline {1}Phần giới thiệu}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Xác định số lượng sinh viên trong tập mẫu}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Các công trình liên quan}{3}{subsection.1.2}%
+\contentsline {section}{\numberline {2}SỐ LƯỢNG SINH VIÊN 1}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Xác định số lượng sinh viên trong tập mẫu 1}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Vẽ biều đồ tần xuất tương đối tích lũy số sinh viên theo phân nhóm outcome các sinh viên có câu trả lời sai trong kỳ thi cuối kỳ trong các nhóm}{5}{subsection.2.2}%
