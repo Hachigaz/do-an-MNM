@@ -22,4 +22,3 @@ class UIObject(pg.sprite.Sprite):
         if(not self.draw_disabled):
             for surface in self.uiSurfaces:
                 surface.draw(drawSurface)
-                

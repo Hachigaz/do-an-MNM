@@ -33,5 +33,8 @@ class MenuScreen(GameScreen.GameScreen):
         self.optionBtn.is_disabled = True
         self.uiGroup.add(self.optionBtn)
         
+        self.testGameBtn= UIButton.UIButton(buttonSurf,pg.Rect(pg.Vector2(pg.Vector2(screenCenterPos.x-400,menuBtnsOffsetY+300)),pg.Vector2(350,80)),"Test play game",25)
+        self.uiGroup.add(self.testGameBtn)
+        
         self.quitBtn = UIButton.UIButton(buttonSurf,pg.Rect(pg.Vector2(screenCenterPos.x,menuBtnsOffsetY+400),pg.Vector2(350,80)),"Quit",25)
         self.uiGroup.add(self.quitBtn)

@@ -46,9 +46,9 @@ class Logic:
         self.end()
         pass
     
+    #end duoc goi khi logic ket thuc khong chay nua isLogicRunning = false
     def end(self) -> None:
         pass
-    
     
     def doQuitGame(self):
         self.isGameRunning = False

@@ -4,18 +4,23 @@ import view.screens.MenuScreen as MenuScreen
 import view.screens.subscreens.menu.MultiplayerScreen as MultiplayerScreen
 import controller.game_logic.CharacterSelect as CharacterSelect
 
-class GameMenu(Logic.Logic):
+import controller.game_logic.GameplayLogic as GameplayLogic
+
+class GameMenu (Logic.Logic):
     def __init__(self) -> None:
         mainScreen = MenuScreen.MenuScreen()
         mainScreen.singlePlayerBtn.setTriggerFunction(self.toSinglePlayer)
         mainScreen.multiplayerBtn.setTriggerFunction(self.toMultiplayer)
         mainScreen.quitBtn.setTriggerFunction(self.doQuitGame)
         
+        mainScreen.testGameBtn.setTriggerFunction(self)
+        
         super().__init__(mainScreen)
         
         
         self.multiplayerScreen = MultiplayerScreen.MultiplayerScreen()
         self.multiplayerScreen.backToMenuBtn.setTriggerFunction(self.backToMenu)
+        
         
         self.run()
         
@@ -36,3 +41,7 @@ class GameMenu(Logic.Logic):
         pass
     def backToMenu(self)->None:
         self.currentScreen = self.mainScreen
+        
+    def testPlayGame(self)->None:
+        self.isLogicRunning = False
+        GameplayLogic.GameplayLogic()
