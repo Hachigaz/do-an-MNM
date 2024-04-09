@@ -1,0 +1,14 @@
+<TextureAtlas imagePath="">
+	<CharacterTexture>
+		<SubAnimatedTexture name="Attack_1.png" x="0" y="0" width="640" height="128" anim-count="5"/>    
+		<SubAnimatedTexture name="Attack_2.png" x="0" y="0" width="384" height="128" anim-count="3"/>
+		<SubAnimatedTexture name="Attack_3.png" x="0" y="0" width="512" height="128" anim-count="4"/>
+		<SubAnimatedTexture name="Run.png" x="0" y="0" width="1024" height="128" anim-count="8"/>
+		<SubAnimatedTexture name="Walk.png" x="0" y="0" width="1024" height="128" anim-count="8"/>
+		<SubAnimatedTexture name="Idle.png" x="0" y="0" width="640" height="128" anim-count="5"/>
+		<SubAnimatedTexture name="Dead.png" x="0" y="0" width="1024" height="128" anim-count="8"/>
+		<SubAnimatedTexture name="Hurt.png" x="0" y="0" width="128" height="128" anim-count="1"/>
+		<SubAnimatedTexture name="Jump.png" x="0" y="0" width="696" height="128" anim-count="7"/>
+		<SubAnimatedTexture name="Protect.png" x="0" y="0" width="256" height="128" anim-count="2"/>
+	</CharacterTexture>
+</TextureAtlas>

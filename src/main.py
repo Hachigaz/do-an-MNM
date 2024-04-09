@@ -5,4 +5,6 @@ import controller.Game as Game
 # # setting path
 # sys.path.append('src')
 pg.init()
+pg.key.set_repeat(1, 20)
+
 game = Game.Game()

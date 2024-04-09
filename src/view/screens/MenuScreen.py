@@ -17,9 +17,8 @@ class MenuScreen(GameScreen.GameScreen):
         
         screenCenterPos:pg.Vector2=  pg.Vector2(self.screenSurf.get_rect().center)
         
-        titleSurf =pg.font.Font("resources/ui/Font/kenvector_future.ttf",40).render("Bom man",True,pg.Color(255,255,255))
-        gameTitle = UIText.UIText(titleSurf,pg.Rect(pg.Vector2(screenCenterPos.x,150),pg.Vector2(titleSurf.get_size())))
-        self.uiGroup.add(gameTitle)
+        title = UIText.UIText(pg.font.Font("resources/ui/Font/kenvector_future.ttf",40),"Bom man",pg.Vector2(screenCenterPos.x,150))
+        self.uiGroup.add(title)
         
         menuBtnsOffsetY=200
         self.singlePlayerBtn = UIButton.UIButton(buttonSurf,pg.Rect(pg.Vector2(pg.Vector2(screenCenterPos.x,menuBtnsOffsetY+100)),pg.Vector2(350,80)),"Singleplayer",25)

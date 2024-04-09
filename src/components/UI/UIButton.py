@@ -3,13 +3,15 @@ import components.UI.UIObject as UIObject
 import pygame as pg
 
 class UIButton(UIObject.UIObject):
-    def __init__(self,surface:pg.Surface,rect:pg.Rect,text:str,fontSize:int)->None:
+    def __init__(self,surface:pg.Surface,rect:pg.Rect,text:str,fontSize:int,is_using_topleft = False)->None:
         super().__init__()
         
         surface = pg.transform.scale(surface,rect.size)
-        surfaceRect=pg.Rect((pg.Vector2(rect.topleft)-pg.Vector2(surface.get_size())/2),pg.Vector2(surface.get_size()))
-        
-        self.uiSurfaces.insert(0,UIObject.uiSprite(surface,surfaceRect))
+        if(not is_using_topleft):
+            surfaceRect=pg.Rect((pg.Vector2(rect.topleft)-pg.Vector2(surface.get_size())/2),pg.Vector2(surface.get_size()))
+        else:
+            surfaceRect= rect
+        self.uiSurfaces.insert(0,UIObject.uiSpriteElement(surface,surfaceRect))
         
         self.setFontSize(fontSize)
         self.setText(text)
@@ -17,12 +19,12 @@ class UIButton(UIObject.UIObject):
         hover_surface_effect=pg.Surface(surface.get_size(),pg.SRCALPHA).convert_alpha()
         hover_surface_effect.fill((255,255,255,100))
         
-        self.hoverEffects.insert(0,UIObject.uiSprite(hover_surface_effect,surfaceRect))
+        self.hoverEffects.insert(0,UIObject.uiSpriteElement(hover_surface_effect,surfaceRect))
         
         disabled_effect=pg.Surface(surface.get_size(),pg.SRCALPHA).convert_alpha()
         disabled_effect.fill((50,50,50,200))
         
-        self.disabledEffects.insert(0,UIObject.uiSprite(disabled_effect,surfaceRect))
+        self.disabledEffects.insert(0,UIObject.uiSpriteElement(disabled_effect,surfaceRect))
         self.is_pressed = False
         self.prev_is_pressed = False
         self.trigger_func=None
@@ -61,7 +63,7 @@ class UIButton(UIObject.UIObject):
     def setText(self,text:str)->None:
         text_surface = self.text_font.render(text,True,pg.Color(255,255,255))
         text_rect=pg.Rect(pg.Vector2(self.uiSurfaces[0].rect.center)-(pg.Vector2(text_surface.get_size())/2),pg.Vector2(text_surface.get_size()))
-        self.uiSurfaces.insert(1,UIObject.uiSprite(text_surface,text_rect))
+        self.uiSurfaces.insert(1,UIObject.uiSpriteElement(text_surface,text_rect))
         
     def setTriggerFunction(self,func):
         self.trigger_func = func

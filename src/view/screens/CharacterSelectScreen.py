@@ -19,13 +19,13 @@ class CharacterSelectScreen(GameScreen.GameScreen):
         
         backgroundSurf = pg.transform.scale(pg.image.load("resources/ui/PNG/main-background.jpg"),self.screenSurf.get_rect().size)
         backgroundRect = pg.Rect(0,0,backgroundSurf.get_rect().width,backgroundSurf.get_rect().height)
-        gameBackground = UIObject.uiSprite(backgroundSurf,backgroundRect)
+        gameBackground = UIObject.uiSpriteElement(backgroundSurf,backgroundRect)
         backgroundObj = UIObject.UIObject()
         backgroundObj.uiSurfaces.insert(0,gameBackground)
         
         backgroundDim = pg.Surface(backgroundRect.size,pg.SRCALPHA).convert_alpha()
         backgroundDim.fill((120,120,120,100))
-        backgroundDimObj = UIObject.uiSprite(backgroundDim,backgroundRect)
+        backgroundDimObj = UIObject.uiSpriteElement(backgroundDim,backgroundRect)
         backgroundObj.uiSurfaces.insert(1,backgroundDimObj)
         
         self.uiGroup.add(backgroundObj)
@@ -38,9 +38,8 @@ class CharacterSelectScreen(GameScreen.GameScreen):
         self.characterSelectBox.addItem(5,"Character 5",None)
         self.uiGroup.add(self.characterSelectBox)
         
-        titleSurf =pg.font.Font("resources/ui/Font/kenvector_future.ttf",40).render("Select Your Character",True,pg.Color(255,255,255))
-        gameTitle = UIText.UIText(titleSurf,pg.Rect(pg.Vector2(screenCenterPos.x,150),pg.Vector2(titleSurf.get_size())))
-        self.uiGroup.add(gameTitle)
+        title = UIText.UIText(pg.font.Font("resources/ui/Font/kenvector_future.ttf",40),"Select Your Character",pg.Vector2(screenCenterPos.x,150))
+        self.uiGroup.add(title)
         
         
         

@@ -10,19 +10,19 @@ class BoxItem(UIObject.UIObject):
         rect = pg.Rect(pg.Vector2(rect.topleft)-pg.Vector2(rect.size)/2,rect.size)
         
         self.is_selected = isSelected
-        self.uiSurfaces.insert(0,UIObject.uiSprite(surf,rect))
+        self.uiSurfaces.insert(0,UIObject.uiSpriteElement(surf,rect))
         self.value = itemValue
         
         
         hover_surface_effect=pg.Surface(surf.get_size(),pg.SRCALPHA).convert_alpha()
         hover_surface_effect.fill((255,255,255,100))
         
-        self.hoverEffects.insert(0,UIObject.uiSprite(hover_surface_effect,rect))
+        self.hoverEffects.insert(0,UIObject.uiSpriteElement(hover_surface_effect,rect))
         
         disabled_effect=pg.Surface(surf.get_size(),pg.SRCALPHA).convert_alpha()
         disabled_effect.fill((50,50,50,200))
         
-        self.disabledEffects.insert(0,UIObject.uiSprite(disabled_effect,rect))
+        self.disabledEffects.insert(0,UIObject.uiSpriteElement(disabled_effect,rect))
         
         self.text = text
         self.image = image
@@ -38,7 +38,7 @@ class BoxItem(UIObject.UIObject):
             imageSize = image.get_rect().size
             imagePos = pg.Vector2(self.uiSurfaces[0].rect.top)-pg.Vector2(imageSize)/2
 
-            self.uiSurfaces.insert(2,UIObject.uiSprite(image,pg.Rect(imagePos.x,imagePos.y,imageSize.x,imageSize.y)))
+            self.uiSurfaces.insert(2,UIObject.uiSpriteElement(image,pg.Rect(imagePos.x,imagePos.y,imageSize.x,imageSize.y)))
         else:
             # self.uiSurfaces[2].surface = None
             # self.uiSurfaces[2].rect = None
@@ -67,7 +67,7 @@ class BoxItem(UIObject.UIObject):
         text_pos = pg.Vector2(self.uiSurfaces[0].rect.centerx,self.uiSurfaces[0].rect.bottom)-pg.Vector2(text_surface.get_size())/2
         text_pos.y -= 40
         text_rect=pg.Rect(text_pos,pg.Vector2(text_surface.get_size()))
-        self.uiSurfaces.insert(1,UIObject.uiSprite(text_surface,text_rect))
+        self.uiSurfaces.insert(1,UIObject.uiSpriteElement(text_surface,text_rect))
         
 
 class UISelectBox(pg.sprite.Sprite):

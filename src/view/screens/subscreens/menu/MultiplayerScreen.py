@@ -13,12 +13,11 @@ class MultiplayerScreen(GameScreen.GameScreen):
     def __init__(self) -> None:
         super().__init__()
         
-        buttonSurf = next(item for item in Textures.loadedSurfaces if item["name"]=="blue_button00")["surface"]
+        buttonSurf = Textures.getLoadedSurfaces("blue_button00")
         
         screenCenterPos:pg.Vector2=  pg.Vector2(self.screenSurf.get_rect().center)
         
-        titleSurf =pg.font.Font("resources/ui/Font/kenvector_future.ttf",40).render("Multiplayer",True,pg.Color(255,255,255))
-        title = UIText.UIText(titleSurf,pg.Rect(pg.Vector2(screenCenterPos.x,150),pg.Vector2(titleSurf.get_size())))
+        title = UIText.UIText(pg.font.Font("resources/ui/Font/kenvector_future.ttf",40),"Multiplayer",pg.Vector2(screenCenterPos.x,150))
         self.uiGroup.add(title)
         
         menuBtnsOffsetY=200
