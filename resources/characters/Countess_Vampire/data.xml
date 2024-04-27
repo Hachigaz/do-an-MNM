@@ -1,6 +1,7 @@
 <TextureAtlas imagePath="">
-	<CharacterTexture true-width="48" true-height="76">
-		<SubAnimatedTexture animation_name="attack_1" name="Attack_1.png" x="0" y="0" width="640" height="128" anim-count="5">
+	<CharacterTexture true-width="52" true-height="71">
+		<SubAnimatedTexture animation_name="attack_1" name="Attack_1.png" x="0" y="0" width="768" height="128" anim-count="6">
+			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
@@ -14,16 +15,20 @@
 			<AnimFrame transition-time="150"/>
 		</SubAnimatedTexture>
 
-		<SubAnimatedTexture animation_name="attack_3" name="Attack_3.png" x="0" y="0" width="512" height="128" anim-count="4">
+		<SubAnimatedTexture animation_name="attack_3" name="Attack_3.png" x="0" y="0" width="128" height="128" anim-count="1">
+			<AnimFrame transition-time="120"/>
+		</SubAnimatedTexture>
+
+		<SubAnimatedTexture animation_name="attack_4" name="Attack_4.png" x="0" y="0" width="768" height="128" anim-count="6">
+			<AnimFrame transition-time="120"/>
+			<AnimFrame transition-time="120"/>
 			<AnimFrame transition-time="120"/>
 			<AnimFrame transition-time="120"/>
 			<AnimFrame transition-time="120"/>
 			<AnimFrame transition-time="150"/>
 		</SubAnimatedTexture>
 		
-		<SubAnimatedTexture animation_name="run" name="Run.png" x="0" y="0" width="1024" height="128" anim-count="8">
-			<AnimFrame transition-time="90"/>
-			<AnimFrame transition-time="90"/>
+		<SubAnimatedTexture animation_name="run" name="Run.png" x="0" y="0" width="768" height="128" anim-count="6">
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
@@ -32,9 +37,7 @@
 			<AnimFrame transition-time="90"/>
 		</SubAnimatedTexture>
 
-		<SubAnimatedTexture animation_name="walk" name="Walk.png" x="0" y="0" width="1024" height="128" anim-count="8">
-			<AnimFrame transition-time="90"/>
-			<AnimFrame transition-time="90"/>
+		<SubAnimatedTexture animation_name="walk" name="Walk.png" x="0" y="0" width="768" height="128" anim-count="6">
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
@@ -62,21 +65,16 @@
 			<AnimFrame transition-time="90"/>
 		</SubAnimatedTexture>
 
-		<SubAnimatedTexture animation_name="hurt" name="Hurt.png" x="0" y="0" width="128" height="128" anim-count="1">
-			<AnimFrame transition-time="90"/>
-		</SubAnimatedTexture>
-
-		<SubAnimatedTexture animation_name="jump" name="Jump.png" x="0" y="0" width="896" height="128" anim-count="7">
-			<AnimFrame transition-time="90"/>
-			<AnimFrame transition-time="90"/>
-			<AnimFrame transition-time="90"/>
-			<AnimFrame transition-time="90"/>
-			<AnimFrame transition-time="90"/>
+		<SubAnimatedTexture animation_name="hurt" name="Hurt.png" x="0" y="0" width="256" height="128" anim-count="2">
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
 		</SubAnimatedTexture>
 
-		<SubAnimatedTexture animation_name="protect" name="Protect.png" x="0" y="0" width="256" height="128" anim-count="2">
+		<SubAnimatedTexture animation_name="jump" name="Jump.png" x="0" y="0" width="768" height="128" anim-count="6">
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>
 		</SubAnimatedTexture>
@@ -88,5 +86,30 @@
 		<Stat name= "attack_1_damage" value="5.0"/>
 		<Stat name= "attack_2_damage" value="5.0"/>
 		<Stat name= "attack_3_damage" value="5.0"/>
+		<Stat name= "attack_4_damage" value="5.0"/>
 	</CharacterStats>
+
+	<Projectiles>
+		<Projectile animation_name = "blood_charge_1" name="Blood_Charge_1.png" x="0" y="0" width="192" height="48" anim-count="3">
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+		</Projectile>
+		<Projectile animation_name = "blood_charge_2" name="Blood_Charge_2.png" x="0" y="0" width="192" height="48" anim-count="3">
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+		</Projectile>
+		<Projectile animation_name = "blood_charge_3" name="Blood_Charge_3.png" x="0" y="0" width="192" height="48" anim-count="3">
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+		</Projectile>
+		<Projectile animation_name = "blood_charge_4" name="Blood_Charge_4.png" x="0" y="0" width="256" height="48" anim-count="4">
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+		</Projectile>
+	</Projectiles>
 </TextureAtlas>
