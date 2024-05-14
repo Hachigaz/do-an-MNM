@@ -22,7 +22,7 @@ class Logic:
                 if event.type == pg.QUIT:
                     self.isGameRunning = False
 
-            self.windowSurface.fill(pg.Color(0,0,0))
+            self.windowSurface.fill(pg.Color(20,20,20))
             
             self.update()
             

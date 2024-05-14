@@ -51,7 +51,10 @@ class UIButton(UIObject.UIObject):
             #call function neu bam nut
             if(self.trigger_func!=None):
                 if(self.is_pressed == False and self.prev_is_pressed == True):
-                    self.trigger_func()
+                    if self.params==None:
+                        self.trigger_func()
+                    else:
+                        self.trigger_func(self.params)
         else:
             for sprite in self.disabledEffects:
                 sprite.draw(drawSurface)
@@ -65,5 +68,6 @@ class UIButton(UIObject.UIObject):
         text_rect=pg.Rect(pg.Vector2(self.uiSurfaces[0].rect.center)-(pg.Vector2(text_surface.get_size())/2),pg.Vector2(text_surface.get_size()))
         self.uiSurfaces.insert(1,UIObject.uiSpriteElement(text_surface,text_rect))
         
-    def setTriggerFunction(self,func):
+    def setTriggerFunction(self,func,params=None):
         self.trigger_func = func
+        self.params = params

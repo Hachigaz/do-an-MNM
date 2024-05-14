@@ -26,7 +26,7 @@ class ChatBox:
     def __init__(self, rect:pg.rect.Rect,messageList:MessageList) -> None:
         self.textInput:UITextInput.UITextInput = UITextInput.UITextInput(pg.rect.Rect(pg.Vector2(rect.left,rect.top+rect.height*0.8+20),pg.Vector2(rect.width*0.8,rect.height*0.2)),"",lambda x:len(x)<=35,20)
         
-        inputCoverSurf = pg.surface.Surface(pg.Vector2(50,50))
+        inputCoverSurf = pg.surface.Surface(pg.Vector2(50,50),pg.SRCALPHA, 32)
         inputCoverSurf.fill(pg.Color(120,120,120,200))
         self.textInputCover:UIObject.UIObject = UIObject.UISprite(inputCoverSurf,pg.rect.Rect(pg.Vector2(rect.left,rect.top+rect.height*0.8),pg.Vector2(rect.width*0.8,rect.height*0.2)),True)
         
@@ -35,7 +35,7 @@ class ChatBox:
         self.sendButton.setTriggerFunction(self.submitMessage)
         
         self.messageList:MessageList = messageList
-        messageCoverSurf = pg.surface.Surface(pg.Vector2(50,50))
+        messageCoverSurf = pg.surface.Surface(pg.Vector2(50,50),pg.SRCALPHA, 32)
         messageCoverSurf.fill(pg.Color(100,100,100,70))
         self.messageListCover = UIObject.UISprite(messageCoverSurf,pg.rect.Rect(pg.Vector2(rect.topleft),pg.Vector2(rect.width,rect.height)),True)
         self.user = "User1"

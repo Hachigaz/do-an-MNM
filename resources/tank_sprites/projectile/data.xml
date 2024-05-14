@@ -1,0 +1,7 @@
+<TextureAtlas imagePath="" width="128" height="128">
+	<CharacterTexture>
+		<SubAnimatedTexture animation_name="projectile" name="projectile.png" x="0" y="0" width="128" height="128" anim-count="1">
+			<AnimFrame transition-time="90"/>
+		</SubAnimatedTexture>
+	</CharacterTexture>
+</TextureAtlas>

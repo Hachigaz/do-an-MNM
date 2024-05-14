@@ -1,8 +1,6 @@
 import pygame as pg
 import components.UI.UIObject as UIObject
-
-#game screen la screen chinh
-#game screen chua cac thanh phan ui
+ 
 class GameScreen:
     screenSurf:pg.Surface
     

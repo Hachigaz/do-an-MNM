@@ -1,6 +1,6 @@
 import pygame as pg
 import controller.Game as Game
-# import sys
+# import sysd
 
 # # setting path
 # sys.path.append('src')

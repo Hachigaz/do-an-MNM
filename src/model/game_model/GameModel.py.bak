@@ -1,0 +1,511 @@
+from __future__ import annotations
+
+import pygame as pg
+import pymunk as pm
+
+import model.game_model.Player as Player
+import model.game_model.PhysicSys as PhysicSys
+
+from enum import Enum
+
+import xml.etree.ElementTree as xmlET
+
+import model.game_model.DesTerrain as Terrain
+
+import threading
+
+class AnimationFrame:
+    def __init__(self,surf,transitionTime:float) -> None:
+        self.surf:pg.surface.Surface = surf
+        self.transitionTime:float = transitionTime
+        self.isLockedFrame:bool = False
+        pass
+
+class Animation:
+    currentTick: int
+    def __init__(self,frameSurface:pg.surface.Surface,animCount:int,frameSize:pg.Vector2,rect:pg.rect.Rect, transitionTimes:list[float]) -> None:
+        self.currentFrame = 0
+        self.rect = rect
+        resizedFrames = []
+        self.resetAnimTick()
+        self.totalAnimTime = sum(transitionTimes)
+        
+        for i in range(animCount):
+            resizedFrames.append(AnimationFrame(pg.transform.scale(pg.surface.Surface.subsurface(frameSurface,pg.rect.Rect(frameSize.x*i,0,frameSize.x,frameSize.y)),rect.size),transitionTimes[i]))
+
+        self.animationFrames:list[AnimationFrame] = resizedFrames
+        
+        self.invertedAnimFrames:list[AnimationFrame] = []
+        for i in range(animCount):
+            self.invertedAnimFrames.append(AnimationFrame(pg.transform.flip(resizedFrames[i].surf,True,False),transitionTimes[i]))
+        pass
+    
+    def resetAnimTick(self):
+        self.lastTick = pg.time.get_ticks()
+        pass
+    
+    def increment(self)->None:
+        self.currentFrame += 1
+        if(self.currentFrame >= len(self.animationFrames)):
+            self.currentFrame = 0
+        pass
+    
+    def getTheFrame(self,isInverted:bool)->pg.surface.Surface:
+        if isInverted:
+            anim = self.invertedAnimFrames[self.currentFrame]
+        else:
+            anim = self.animationFrames[self.currentFrame]
+            
+        return anim.surf
+    
+    def isLastFrame(self)->bool:
+        return self.currentFrame == (len(self.animationFrames) - 1)
+        
+    def isEndOfFrame(self)->bool:
+        anim = self.animationFrames[self.currentFrame]
+        if(Animation.currentTick - self.lastTick > anim.transitionTime and not anim.isLockedFrame):
+            return True
+        else:
+            return False
+    
+    def lockFrame(self,frameIdx:int):
+        self.animationFrames[frameIdx].isLockedFrame = True
+        self.invertedAnimFrames[frameIdx].isLockedFrame = True
+        
+    def unlockFrame(self,frameIdx:int):
+        self.animationFrames[frameIdx].isLockedFrame = False
+        self.invertedAnimFrames[frameIdx].isLockedFrame = False
+    
+    def getTheFrameAndUpdate(self,isInverted:bool)->pg.surface.Surface:
+        if isInverted:
+            anim = self.invertedAnimFrames[self.currentFrame]
+        else:
+            anim = self.animationFrames[self.currentFrame]
+            
+        if(Animation.currentTick - self.lastTick > anim.transitionTime and not anim.isLockedFrame):
+            self.increment()
+            self.lastTick = Animation.currentTick
+            
+        return anim.surf
+    
+        
+    
+    def reset(self)->None:
+        self.currentFrame = 0
+        pass
+    pass
+
+class StaticGameObject(pg.sprite.Sprite):
+    def __init__(self, rect:pg.rect.Rect, surf:pg.surface.Surface) -> None:
+        super().__init__()        
+        self.rect:pg.rect.Rect=rect
+        self.surf:pg.surface.Surface = surf
+        
+        self.body = pm.Body(1,float("inf"),body_type=pm.Body.STATIC)
+        self.body._set_position(rect.center)
+        self.poly = pm.Poly.create_box(self.body,rect.size,0)
+        self.poly.elasticity=0.0
+        self.poly.friction = 1.0
+        
+        PhysicSys.PhysicManager.physicManager.addObject(self.body,self.poly)
+    
+        RenderManager.renderManager.addObject(self)
+
+    def update(self,renderSurface:pg.surface.Surface):
+        coord = pg.Vector2(self.body._get_position().x,self.body._get_position().y)-pg.Vector2(self.rect.size[0]/2,self.rect.size[1]/2)
+        renderSurface.blit(self.surf,coord)
+        pass
+    pass
+
+class CollideSurface:
+    group:pg.sprite.Group = pg.sprite.Group()
+    def __init__(self,surf:pg.Surface,rect:pg.rect.Rect) -> None:
+        
+        surf = pg.transform.scale(surf,pg.Vector2(rect.width,rect.height))
+        
+        self.object:StaticGameObject = StaticGameObject(rect,surf)
+        
+        CollideSurface.group.add(self.object)
+        pass
+    pass
+
+class GameObject(pg.sprite.Sprite):
+    def __init__(self, rect:pg.rect.Rect, animations:dict[Animation],collideBox:pg.rect.Rect,firstAnim:any = None) -> None:
+        super().__init__()        
+        self.rect:pg.rect.Rect=rect
+        self.animations:dict[Animation] = animations
+        
+        self.isInverted:bool = False
+        
+        self.isOneTimeAnim:bool = False
+        self.collideOffset:pg.Vector2 = pg.Vector2(collideBox.topleft[0],collideBox.topleft[1])
+        self.collideBox:pg.rect.Rect = pg.rect.Rect(rect.topleft[0]+collideBox.topleft[0],rect.topleft[1]+collideBox.topleft[1],collideBox.width,collideBox.height)
+        
+        
+        self.body:pm.Body = pm.Body(1,float("inf"),pm.Body.DYNAMIC)
+        self.body._set_position(self.collideBox.center)
+        
+        self.poly:pm.Poly = pm.Poly.create_box(self.body,self.collideBox.size)
+        self.poly.elasticity=0.0
+        self.poly.friction=1.0
+        
+        PhysicSys.PhysicManager.physicManager.addObject(self.body,self.poly)
+        
+        
+        if(firstAnim==None):
+            self.currentAnimation:int = list(self.animations.keys())[0]
+        else:
+            self.currentAnimation = firstAnim
+        
+        RenderManager.renderManager.addObject(self)
+
+    def update(self,renderSurface:pg.surface.Surface):
+        if self.isOneTimeAnim:
+            currentAnim:Animation = self.animations[self.currentAnimation]
+            if currentAnim.currentFrame == len(currentAnim.animationFrames) - 1:
+                if currentAnim.isEndOfFrame():
+                    self.isOneTimeAnim = False
+                    self.changeAnim(self.nextAnim)
+                    self.nextAnim = None
+        
+        coord = pg.Vector2(self.body._get_position().x,self.body._get_position().y) - self.collideOffset - pg.Vector2(self.collideBox.size[0]/2,self.collideBox.size[1]/2)
+        renderSurface.blit(self.animations[self.currentAnimation].getTheFrameAndUpdate(self.isInverted),coord)
+        pass
+    
+    def changeAnim(self,anim):
+        if anim != self.currentAnimation:
+            self.currentAnimation = anim
+            self.animations[self.currentAnimation].reset()
+    
+    def invertObj(self):
+        self.isInverted = not self.isInverted
+        self.animations[self.currentAnimation].reset()
+        
+    def oneTimeAnim(self, playAnim:any, endAnim:any):
+        self.changeAnim(playAnim)
+        self.nextAnim = endAnim
+        self.isOneTimeAnim = True
+        
+    def getCurrrentAnim(self)->Animation:
+        return self.animations[self.currentAnimation]
+    pass
+
+class PlayerStatus(Enum):
+    IDLE = 0
+    WALKING = 1
+    RUNNING = 2
+    ON_AIR = 3
+    ON_HIT = 4
+
+class Player:
+    playerGroup:pg.sprite.Group = pg.sprite.Group()
+    def __init__(self,object:GameObject) -> None:
+        self.object:GameObject = object
+        self.attacks:list[Attack]
+        self.isStunned:bool = False
+        self.isBlocking:bool = False
+        self.isAttacking:bool = False
+        self.isMoving:bool = False
+        self.isIdle: bool = True
+        self.object.changeAnim("idle")
+        
+        Player.playerGroup.add(object)
+        pass
+        
+    
+    def isOnAir(self)->bool:
+        if self.object.body.velocity[1]<-10 or self.object.body.velocity[1]>10:
+            return True
+        else:
+            return False
+    
+    def moveLeft(self):
+        if(not self.isAttacking):
+            self.isMoving = True
+            if(self.object.isInverted):
+                self.object.invertObj()
+                
+            self.object.body.velocity = 40.0,self.object.body.velocity[1]
+            if (not self.isOnAir()):
+                self.object.changeAnim("run")
+
+        pass
+    
+    def moveRight(self):
+        if(not self.isAttacking):
+            self.isMoving = True
+            if(not self.object.isInverted):
+                self.object.invertObj()
+                
+            self.object.body.velocity = -40.0,self.object.body.velocity[1]
+            if (not self.isOnAir()):
+                self.object.changeAnim("run")
+        pass
+    
+    def jump(self):
+        if(not self.isAttacking and not self.isOnAir()):
+            self.object.body.velocity = self.object.body.velocity[0],-60.0
+            self.object.animations["jump"].lockFrame(5)
+            self.object.oneTimeAnim("jump","idle")
+            
+    def get_hurt(self):
+        self.object.oneTimeAnim("hurt")
+    
+    def attack1(self):
+        if(not self.isOnAir()):
+            self.isAttacking = True
+            self.object.oneTimeAnim("attack_1","idle")
+        pass
+    
+    def attack2(self):
+        if(not self.isOnAir()):
+            self.isAttacking = True
+            self.object.oneTimeAnim("attack_2","idle")
+        pass
+    
+    def attack3(self):
+        if(not self.isOnAir()):
+            self.isAttacking = True
+            self.object.oneTimeAnim("attack_3","idle")
+        pass
+    
+    def block(self):
+        pass
+    
+    def update(self):
+        if(self.isAttacking):
+            if self.object.getCurrrentAnim().isLastFrame() and self.object.getCurrrentAnim().isEndOfFrame():
+                self.isAttacking=False
+        
+
+        # self.object.moveVector.y = -self.jumpForce
+        # if(self.jumpForce>0):
+        #     self.jumpForce -= 20
+        #     if(self.jumpForce<0):
+        #         self.jumpForce = 0
+        #     pass
+        
+        #update collision       
+        # for surface in CollideSurface.group:
+        #     if(self.object.collideBox.colliderect(surface.rect)):
+        #         lv:pg.Vector2 = self.object.prevPos - pg.Vector2(surface.rect.center)
+                
+        #         p1 = 0
+        #         p2 = 0
+        #         if(abs(lv.x) > abs(lv.y)):
+        #             if(lv.x>0):
+        #                 p1 = pg.Vector2(surface.rect.topright)
+        #                 p2 = pg.Vector2(surface.rect.bottomright)
+        #             else:
+        #                 p1 = pg.Vector2(surface.rect.topleft)
+        #                 p2 = pg.Vector2(surface.rect.bottomleft)
+        #         else:
+        #             if(lv.y>0):
+        #                 p1 = pg.Vector2(surface.rect.bottomleft)
+        #                 p2 = pg.Vector2(surface.rect.bottomright)
+        #             else:
+        #                 p1 = pg.Vector2(surface.rect.topleft)
+        #                 p2 = pg.Vector2(surface.rect.topright)
+                
+        #         po = self.object.moveVector
+        #         pv = p1-p2
+                
+        #         xIn = (po.y-pv.y)/(pv.x-po.y)
+        #         yIn = po.y + xIn*po.x
+                
+        #         inPos = pg.Vector2(xIn,yIn)
+                
+        #         # self.object.moveTo(inPos)
+                
+        #         self.object.moveTo(self.object.prevPos)
+
+        #         # xDist = self.object.rect.width/2 + surface.rect.width/2
+        #         # yDist = self.object.rect.height/2 + surface.rect.height/2
+                
+        #         # moveVectorNorm = -self.object.moveVector.normalize()
+                
+        #         # self.object.rect.center = pg.Vector2(self.object.rect.center[0],self.object.rect.center[1]) - self.object.moveVector
+        #         pass
+                
+        #update move vec 
+        pass
+            
+        if(not self.isMoving or self.isAttacking or self.isBlocking or self.isStunned):
+            if(not self.isIdle):
+                self.object.changeAnim("idle")
+                self.isIdle = True
+        else:
+            self.isIdle = False
+    
+    pass
+
+class Attack:
+    def __init__(self,attackObject:GameObject,attackRect:pg.rect.Rect) -> None:
+        self.attackObject:GameObject
+        self.attackRect:pg.rect.Rect
+        pass
+    
+    def render(self,renderRect:pg.surface.Surface):
+        pass
+    pass    
+
+class RenderManager:
+    renderManager:RenderManager
+    
+    class Viewport:
+        def __init__(self,viewportSize:tuple[int,int],renderSize:tuple[int,int],pos:tuple[0,0] = (0,0)) -> None:
+            self.viewportSize = viewportSize
+            self.pos:tuple[int,int] = pos
+            self.renderSize = renderSize
+            self.rect = pg.rect.Rect(pos[0]-renderSize[0]/2,pos[1]/renderSize[1],renderSize[0],renderSize[1])
+            self.renderRatio = (viewportSize[0]/renderSize[0],viewportSize[1]/renderSize[1])
+            self.revRenderRatio = (renderSize[0]/viewportSize[0],renderSize[1]/viewportSize[1])
+            pass
+        def setPosition(self,pos:tuple[0,0])->None:
+            self.pos = pos
+    
+    def __init__(self,renderSurface:pg.surface.Surface) -> None:
+        self.renderSurface:pg.surface.Surface = renderSurface    
+        self.viewport:RenderManager.Viewport = RenderManager.Viewport((self.renderSurface.get_width(),self.renderSurface.get_height()),(2500,1500))
+        
+        self.renderList:pg.sprite.Group = pg.sprite.Group()
+        pass
+    
+    def addObject(self,object:GameObject)->None:
+        self.renderList.add(object)
+        pass
+    
+    def removeObject(self,object:GameObject)->None:
+        self.renderList.remove(object)
+        pass
+    
+    def render(self)->None:
+        self.renderList.update(self.renderSurface)
+        pass
+    pass
+
+class GameModel:
+    def __init__(self,characters:list[str],map:str,renderSurface:pg.surface.Surface) -> None:
+        RenderManager.renderManager = RenderManager(renderSurface)
+        PhysicSys.PhysicManager.physicManager = PhysicSys.PhysicManager()
+        
+        self.renderSurface:pg.surface.Surface = renderSurface
+        
+        
+        self.loadMap(map)
+        
+        self.players:list[Player]=[]
+        self.loadAssets(characters=characters)
+        self.projectiles = []
+        
+        Terrain.Terrain.terrain = Terrain.Terrain()
+        Terrain.Terrain.terrain.start()
+        pass
+    
+    def start(self):
+        pass
+    
+    def loadAssets(self,characters:list[str]):
+        projectileSize = (64,48)
+        
+        finalSize = 100
+
+        loadPath= "resources/characters/"
+        
+        
+        
+        for character in characters:
+            print(f"loading character: {character}:")
+            tree:xmlET.ElementTree = xmlET.parse(loadPath+character+"/data.xml")
+            root:xmlET.Element = tree.getroot()
+            characterTree = root[0]
+            
+            xScale = finalSize / float(characterTree.attrib["full-width"])
+            yScale =  finalSize / float(characterTree.attrib["full-height"])
+            
+            collideBox = pg.rect.Rect(float(characterTree.attrib["offsetx"]) * xScale,float(characterTree.attrib["offsety"]) * yScale,float(characterTree.attrib["width"]) * xScale,float(characterTree.attrib["height"]) * yScale)
+            characterAnims:dict[Animation] = {}
+            
+            for subAnim in characterTree:
+                print(f"loading animation: {subAnim.attrib['animation_name']}")
+                
+                animName = subAnim.attrib["animation_name"]
+                texName = subAnim.attrib["name"]
+                texOffset = pg.Vector2(float(subAnim.attrib["x"]),float(subAnim.attrib["y"]))
+                texSize = pg.Vector2(float(subAnim.attrib["width"]),float(subAnim.attrib["height"]))
+                texCount = int(subAnim.attrib["anim-count"])
+                
+                
+                transitionTimes : list[float] = []
+                for animFrame in subAnim:
+                    transitionTimes.append(float(animFrame.attrib["transition-time"]))
+                
+                
+                surfAspectRatio = (texSize.x/texCount)/texSize.y
+                preferedSize = pg.Vector2(finalSize,finalSize/surfAspectRatio)
+                
+                animSurf = pg.image.load(loadPath+character+"/"+texName)
+                animation = Animation(animSurf,texCount,pg.Vector2(texSize.x/texCount,texSize.y),pg.rect.Rect(0,0,preferedSize.x,preferedSize.y),transitionTimes)
+                characterAnims[animName]=animation
+                
+                    
+            
+            
+            characterStats = root[1]
+            for child in characterStats:
+                statName = child.attrib["name"]
+                statValue = child.attrib["value"]
+                
+                pass
+            
+            projectilesRoot:xmlET.Element = root.find("Projectiles")
+            if projectileSize != None:
+                pass
+                
+            
+            player = Player(GameObject(pg.rect.Rect(0,100,0,0),characterAnims,collideBox))
+            
+            self.players.append(player)
+    
+    def loadMap(self,map:str):
+        # groundSurf = pg.surface.Surface(pg.Vector2(10,10))
+        # groundSurf.fill(pg.color.Color(100,255,100))
+        # self.groundSurface = CollideSurface(groundSurf,pg.rect.Rect(0,500,2000,1000))
+        
+        
+        # # groundSurf = pg.surface.Surface(pg.Vector2(10,10))
+        # # groundSurf.fill(pg.color.Color(100,255,100))
+        # # self.groundSurface = CollideSurface(groundSurf,pg.rect.Rect(0,300,500,500))
+        
+        # groundSurf = pg.surface.Surface(pg.Vector2(10,10))
+        # groundSurf.fill(pg.color.Color(100,255,100))
+        # self.groundSurface = CollideSurface(groundSurf,pg.rect.Rect(1000,300,300,500))
+        pass
+    
+    def update(self):
+        # PhysicSys.PhysicManager.physicManager.debugUpdate(self.renderSurface)
+        PhysicSys.PhysicManager.physicManager.update()
+        
+        
+        terrainUpdateThread = threading.Thread(target=Terrain.Terrain.terrain.update)
+        terrainUpdateThread.start()
+        
+        Animation.currentTick = pg.time.get_ticks()
+        
+        for player in self.players:
+            player.update()
+            
+            
+
+        terrainUpdateThread.join()
+        
+        for player in self.players:
+            player.isMoving = False
+            
+    def render(self):
+        terrainRenderThread = threading.Thread(target=Terrain.Terrain.terrain.render,args=[self.renderSurface,RenderManager.renderManager.viewport])
+        terrainRenderThread.start()
+        
+        RenderManager.renderManager.render()
+        
+        terrainRenderThread.join()

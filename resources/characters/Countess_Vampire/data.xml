@@ -1,5 +1,5 @@
 <TextureAtlas imagePath="">
-	<CharacterTexture true-width="52" true-height="71">
+	<CharacterTexture width="64" height="80" offsetx="32" offsety="48" full-width="128" full-height="128">
 		<SubAnimatedTexture animation_name="attack_1" name="Attack_1.png" x="0" y="0" width="768" height="128" anim-count="6">
 			<AnimFrame transition-time="90"/>
 			<AnimFrame transition-time="90"/>

@@ -19,11 +19,11 @@ class PauseScreen(GameScreen.GameScreen):
         self.uiGroup.add(title)
         
         menuBtnsOffsetY=200
+        
         self.resumeBtn = UIButton.UIButton(buttonSurf,pg.Rect(pg.Vector2(pg.Vector2(screenCenterPos.x,menuBtnsOffsetY+100)),pg.Vector2(350,80)),"Resume",25)
         self.uiGroup.add(self.resumeBtn)
         
         self.quitBtn = UIButton.UIButton(buttonSurf,pg.Rect(pg.Vector2(screenCenterPos.x,menuBtnsOffsetY+200),pg.Vector2(350,80)),"Quit",25)
         self.uiGroup.add(self.quitBtn)
-        
         
     pass

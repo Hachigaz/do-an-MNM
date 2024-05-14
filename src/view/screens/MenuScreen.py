@@ -8,7 +8,7 @@ import components.UI.UIText as UIText
 import components.UI.UIButton as UIButton
 
 class MenuScreen(GameScreen.GameScreen):        
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         
         

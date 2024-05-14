@@ -5,9 +5,13 @@ import components.UI.UIObject as UIObject
 import components.borrowed.pygame_textinput as TextInput
 
 class UITextInput (UIObject.UIObject):
-    def __init__(self,rect:pg.rect.Rect, initText:str, validatorFunc, fontSize:int) -> None:
+    def __init__(self,rect:pg.rect.Rect, initText:str, validatorFunc, fontSize:int,is_clickable:bool = False) -> None:
         super().__init__()
-        inputManager = TextInput.TextInputManager(initText,validator=validatorFunc)
+        if validatorFunc != None:
+            inputManager = TextInput.TextInputManager(initText,validator=validatorFunc)
+        else:
+            inputManager = TextInput.TextInputManager(initText)
+            
         inputFont = pg.font.SysFont("Consolas",fontSize)
         
         self.textInput = TextInput.TextInputVisualizer(inputManager,inputFont,font_color=pg.Color(255,255,255))
@@ -15,18 +19,32 @@ class UITextInput (UIObject.UIObject):
         self.textInput.cursor_width=3
         
         #inputSprite = UIObject.uiSpriteElement(self.textInput.surface,pg.rect.Rect(pg.Vector2(rect.topleft)-pg.Vector2(self.textInput.surface.get_size()),pg.Vector2(self.textInput.surface.get_size())))
-        inputSprite = UIObject.uiSpriteElement(self.textInput.surface,pg.rect.Rect(pg.Vector2(rect.topleft),pg.Vector2(self.textInput.surface.get_size())))
+        inputSprite = UIObject.uiSpriteElement(self.textInput.surface,pg.rect.Rect(pg.Vector2(rect.topleft)+pg.Vector2(3,3),pg.Vector2(self.textInput.surface.get_size())))
         
+        self.rect=rect
+        self.rect.height = fontSize*1.5
+        self.textInputOverlay = pg.surface.Surface(self.rect.size,pg.SRCALPHA,32)
+        self.textInputOverlay.fill(pg.color.Color(255,255,255,20))
+            
         self.uiSurfaces.insert(0,inputSprite)
         
-        self.isInputEnabled = True
+        self.is_clickable = is_clickable
+        
+        self.isInputEnabled = False
     
     def update(self, drawSurface: pg.Surface) -> None:
+        drawSurface.blit(self.textInputOverlay,self.rect.topleft)
+        if(self.is_clickable):
+            if pg.mouse.get_pressed()[0]==1:
+                if(self.rect.collidepoint(pg.mouse.get_pos()[0],pg.mouse.get_pos()[1])):
+                    self.enableInput()
+                else:
+                    self.disableInput()
         
         self.uiSurfaces[0].surface = self.textInput.surface
         if(self.isInputEnabled == True):
             self.textInput.update(pg.event.get())
-            
+    
         super().update(drawSurface)
         
     def disableInput(self) -> None:
@@ -35,4 +53,8 @@ class UITextInput (UIObject.UIObject):
         
     def enableInput(self) -> None:
         self.isInputEnabled = True
-        self.textInput.cursor_width=3        
+        self.textInput.cursor_width=3
+        
+    def toggleInput(self)->None:
+        self.isInputEnabled = not self.isInputEnabled
+        self.textInput.cursor_width = 3 - self.textInput.cursor_width

@@ -1,0 +1,13 @@
+<TextureAtlas imagePath="" width="256" height="128">
+	<CharacterTexture>
+		<SubAnimatedTexture animation_name="cannon_idle" name="cannon_idle.png" x="0" y="0" width="128" height="128" anim-count="1">
+			<AnimFrame transition-time="90"/>
+		</SubAnimatedTexture>
+		<SubAnimatedTexture animation_name="cannon_firing" name="cannon_firing.png" x="0" y="0" width="512" height="128" anim-count="4">
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+			<AnimFrame transition-time="90"/>
+		</SubAnimatedTexture>
+	</CharacterTexture>
+</TextureAtlas>

@@ -8,6 +8,11 @@ import view.screens.subscreens.menu.HostOptionScreen as HostOptionScreen
 import controller.game_logic.CharacterSelect as CharacterSelect
 
 import controller.game_logic.GameplayLogic as GameplayLogic
+import controller.game_logic.LobbyLogic as LobbyLogic
+
+import view.screens.subscreens.dialog.dialog as Dialog
+
+import pygame as pg
 
 class GameMenu (Logic.Logic):
     def __init__(self) -> None:
@@ -30,6 +35,7 @@ class GameMenu (Logic.Logic):
         self.multiplayerScreen.browseBtn.setTriggerFunction(self.toBrowseServer)
         
         self.hostOptionScreen = HostOptionScreen.HostOptionScreen()
+        self.hostOptionScreen.createBtn.setTriggerFunction(self.processCreateGameLobby)
         self.hostOptionScreen.backBtn.setTriggerFunction(self.backToMultiplayer)
         
         self.browseServerScreen = BrowseServerScreen.BrowseServerScreen()
@@ -81,3 +87,35 @@ class GameMenu (Logic.Logic):
     def testPlayGame(self)->None:
         self.isLogicRunning = False
         self.returnLogic = GameplayLogic.GameplayLogic
+        
+    def processCreateGameLobby(self):
+        if(self.hostOptionScreen.playerNameInput.textInput.value==""):
+            dialog = Dialog.Dialog("Please enter player name",pg.Vector2(500,200))
+            dialog.confirmButton.setTriggerFunction(self.closeDialog,dialog)
+            self.screenControl.addScreenByIndex(1,dialog)
+            self.screenControl.currentScreens[0].disableUI()
+            self.hostOptionScreen.portInput.is_clickable = False
+            self.hostOptionScreen.playerNameInput.is_clickable = False
+            return
+        
+        if(self.hostOptionScreen.portInput.textInput.value==""):
+            dialog = Dialog.Dialog("Please enter port number",pg.Vector2(500,200))
+            dialog.confirmButton.setTriggerFunction(self.closeDialog,dialog)
+            self.screenControl.addScreenByIndex(1,dialog)
+            self.screenControl.currentScreens[0].disableUI()
+            self.hostOptionScreen.portInput.is_clickable = False
+            self.hostOptionScreen.playerNameInput.is_clickable = False
+            return            
+        
+        playerName = self.hostOptionScreen.playerNameInput.textInput.value
+        portNumber = self.hostOptionScreen.portInput.textInput.value
+        
+        self.isLogicRunning = False
+        self.returnLogic = LobbyLogic.LobbyLogic(playerName,portNumber)
+        
+    def closeDialog(self,dialog):
+        self.screenControl.removeScreen(dialog)
+        self.screenControl.currentScreens[0].enableUI()
+        self.hostOptionScreen.portInput.is_clickable = True
+        self.hostOptionScreen.playerNameInput.is_clickable = True
+        pass
