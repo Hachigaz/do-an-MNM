@@ -51,3 +51,5 @@ The game has a simple text chatbox in the game lobby for messaging with your fri
 ![image](https://github.com/Hachigaz/do-an-MNM/assets/58378033/a2e37dc6-487b-4d27-815b-9465ecf7edf5)
 ###
 The game is poorly optimized so it might run slow on some devices.
+###
+project report
