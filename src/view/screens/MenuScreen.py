@@ -17,7 +17,7 @@ class MenuScreen(GameScreen.GameScreen):
         
         screenCenterPos:pg.Vector2=  pg.Vector2(self.screenSurf.get_rect().center)
         
-        title = UIText.UIText(pg.font.Font("resources/ui/Font/kenvector_future.ttf",40),"Bom man",pg.Vector2(screenCenterPos.x,150))
+        title = UIText.UIText(pg.font.Font("resources/ui/Font/kenvector_future.ttf",40),"fly war",pg.Vector2(screenCenterPos.x,150))
         self.uiGroup.add(title)
         
         menuBtnsOffsetY=200

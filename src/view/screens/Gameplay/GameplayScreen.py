@@ -8,11 +8,11 @@ import pygame as pg
 
 
 class GameplayScreen(GameScreen.GameScreen):
-    def __init__(self,playerCount) -> None:
+    def __init__(self,playerCount,currentPlayerIndex) -> None:
         super().__init__()
     
         self.playerHealthDisplay = HealthDisplay.PlayerHealthDisplay(pg.Vector2(self.screenSurf.get_size()),5)
-        self.mapDisplay = MapDisplay.MapDisplay(playerCount,pg.Vector2(self.screenSurf.get_size()),pg.rect.Rect(0,0,2000,1500))
+        self.mapDisplay = MapDisplay.MapDisplay(playerCount,pg.Vector2(self.screenSurf.get_size()),pg.rect.Rect(0,0,2000,1500),currentPlayerIndex)
 
 
     def update(self) -> None:

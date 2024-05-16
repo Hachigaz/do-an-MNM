@@ -237,8 +237,12 @@ class HostLobbyLogic(Logic.Logic):
             
             
             startGameMessage = START_GAME_MESSAGE
+            startGameMessage["data"]["player_count"]=len(self.playerList)
+            playerIndex = 1 
             for ip,client in self.clientSockets.items():
+                startGameMessage["data"]["player_index"]=playerIndex
                 client.send(pickle.dumps(startGameMessage))
+                playerIndex+=1
             pass
         else:
             dialog = Dialog.Dialog("Not enough player",pg.Vector2(500,200))
@@ -271,7 +275,7 @@ class HostLobbyLogic(Logic.Logic):
         # Start the thread
         socketUpdateThread.start()
         super().update()
-        socketUpdateThread.join()        
+        socketUpdateThread.join()
     
     def end(self) -> tuple[Logic.Logic, list]:
         self.isHandlingClients = False
@@ -317,20 +321,18 @@ class ClientLobbyLogic(Logic.Logic):
                 if data["stage"] != "lobby":
                     raise Exception("error_handling2")
                 func = data["func"]
+                funcData = data["data"]
                 if(func=="join_lobby_res"):
-                    funcData = data["data"]
                     for ip,playerName in funcData["player_list"].items():
                         self.processPlayerJoinMessage(ip,playerName)
                     pass
                 if(func=="incoming_message"):
-                    funcData = data["data"]
                     playerName = funcData["player"]
                     message = funcData["message"]
                     self.mainScreen.chatBox.addMessage(playerName,message)
                     pass
                 pass
                 if(func=="join_lobby"):
-                    funcData=data["data"]
                     playerName = funcData["player_name"]
                     ip = funcData["ip_address"]
                     self.processPlayerJoinMessage(ip,playerName)
@@ -341,6 +343,8 @@ class ClientLobbyLogic(Logic.Logic):
                     self.processPlayerLeaveMessage(ip,playerName)
                 if func=="start_game":
                     self.isGameStarting=True
+                    self.playerCount = funcData["player_count"]
+                    self.playerIndex = funcData["player_index"]
                     self.startGame()
                 pass 
             except socket.timeout as e:
@@ -355,7 +359,9 @@ class ClientLobbyLogic(Logic.Logic):
         self.returnLogic = GameplayLogic.ClientLogic
         self.returnLogicParams = [
             self.clientSocket.getsockname(),
-            self.clientSocket
+            self.clientSocket,
+            self.playerCount,
+            self.playerIndex
         ]
         pass 
     

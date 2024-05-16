@@ -1,0 +1,7 @@
+<TextureAtlas imagePath="" width="256" height="256">
+	<CharacterTexture>
+		<SubAnimatedTexture animation_name="tank_idle" name="tank_destroyed.png" x="0" y="0" width="256" height="256" anim-count="1">
+			<AnimFrame transition-time="90"/>
+		</SubAnimatedTexture>
+	</CharacterTexture>
+</TextureAtlas>

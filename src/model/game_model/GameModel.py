@@ -196,12 +196,13 @@ class Sprite:
 
 class GameObject(pg.sprite.Sprite):
     group:pg.sprite.Group = pg.sprite.Group()
-    
+    objectCount = 0
     modelDataGroup:dict[str,dict[str,str]]={}
     def __init__(self, rect:pg.rect.Rect,collideBox:pg.rect.Rect,body:pm.body.Body = pm.Body(100,100000,pm.Body.DYNAMIC)) -> None:
         super().__init__()
         self.rect:pg.rect.Rect=rect
-        
+        self.objectID = "OBJECT_"+str(GameObject.objectCount)
+        GameObject.objectCount += 1
         
         self.body:pm.Body = body
         self.body._set_position((rect.center[0], rect.center[1]))
@@ -232,6 +233,7 @@ class GameObject(pg.sprite.Sprite):
     def destroy(self):
         RenderManager.renderManager.removeObject(self)
         PhysicSys.PhysicManager.physicManager.removeObject(self.body,self.poly)
+        self.group.remove(self)
         
 class Player(GameObject):
     def __init__(self, rect: Rect,healthCount:int) -> None:
@@ -244,6 +246,7 @@ class Player(GameObject):
         self.firingPower = 10.0
         
         self.lastFired = 0.0
+        self.isAlive = True
         
         self.health = healthCount
         
@@ -252,23 +255,29 @@ class Player(GameObject):
         
         
         
-        GameObject.modelDataGroup[self]={
+        GameObject.modelDataGroup[self.objectID]={
             "name":"Player",
             "pos":self.body.position,
             "angle":self.body.angle
         }
         pass
     
-    def fireCannon(self):
-        direction = self.getCannonDirection()
-        offset = 50
-        velocity = self.firingPower*10
-        finalOffset = (self.body.position[0] + offset*direction.x,self.body.position[1]+ offset*direction.y)
-        finalVelocity = (velocity*direction.x,velocity*direction.y)
-
-        # print(finalOffset, finalVelocity, direction, velocity, offset)
+    def setDeathSprite(self):
+        self.sprites["tank"]=Sprite(GameModel.assets["spriteAnims"]["tank_destroyed"])
         
-        projectile = Projectile(pg.rect.Rect(finalOffset,(20,20)),finalVelocity)
+    def fireCannon(self):
+        if self.isAlive:
+            if(pg.time.get_ticks() - self.lastFired > 1000):
+                self.lastFired = pg.time.get_ticks()
+                direction = self.getCannonDirection()
+                offset = 50
+                velocity = self.firingPower*10
+                finalOffset = (self.body.position[0] + offset*direction.x,self.body.position[1]+ offset*direction.y)
+                finalVelocity = (velocity*direction.x,velocity*direction.y)
+
+            # print(finalOffset, finalVelocity, direction, velocity, offset)
+            
+                projectile = Projectile(pg.rect.Rect(finalOffset,(20,20)),finalVelocity)
         pass
     
     # def jump(self):
@@ -276,48 +285,52 @@ class Player(GameObject):
             
             
     def spinLeft(self):
-        self.body.angle -= 0.04
+        if self.isAlive:
+            self.body.angle -= 0.04
         pass
     
     def spinRight(self):
-        self.body.angle += 0.04
+        if self.isAlive:
+            self.body.angle += 0.04
         pass
     
     def moveForward(self):
-        moveVector = pg.Vector2.rotate(pg.Vector2(0.0,-70.0),math.degrees(self.body.angle))
-        self.body.velocity = (moveVector.x,moveVector.y)
+        if self.isAlive:
+            moveVector = pg.Vector2.rotate(pg.Vector2(0.0,-70.0),math.degrees(self.body.angle))
+            self.body.velocity = (moveVector.x,moveVector.y)
         pass    
     
     def moveBackward(self):
         pass
     
     def brake(self):
-        if abs(self.body.velocity[0]) > 0:
-            if(self.body.velocity[0]>0):
-                self.body.velocity = (self.body.velocity[0]-2,self.body.velocity[1])
-            else:
-                self.body.velocity = (self.body.velocity[0]+2,self.body.velocity[1])
-            if abs(self.body.velocity[0]) < 3:
-                self.body.velocity = (0,self.body.velocity[1])
-        if abs(self.body.velocity[1]) > 0:
-            if(self.body.velocity[1]>0):
-                self.body.velocity = (self.body.velocity[0],self.body.velocity[1]-2)
-            else:
-                self.body.velocity = (self.body.velocity[0],self.body.velocity[1]+2)
-            if abs(self.body.velocity[1]) < 3:
-                self.body.velocity = (self.body.velocity[0],0)
+        if self.isAlive:
+            if abs(self.body.velocity[0]) > 0:
+                if(self.body.velocity[0]>0):
+                    self.body.velocity = (self.body.velocity[0]-2,self.body.velocity[1])
+                else:
+                    self.body.velocity = (self.body.velocity[0]+2,self.body.velocity[1])
+                if abs(self.body.velocity[0]) < 3:
+                    self.body.velocity = (0,self.body.velocity[1])
+            if abs(self.body.velocity[1]) > 0:
+                if(self.body.velocity[1]>0):
+                    self.body.velocity = (self.body.velocity[0],self.body.velocity[1]-2)
+                else:
+                    self.body.velocity = (self.body.velocity[0],self.body.velocity[1]+2)
+                if abs(self.body.velocity[1]) < 3:
+                    self.body.velocity = (self.body.velocity[0],0)
     
     def destroy(self):
-        self.playerGroup.remove(self)
+        GameObject.modelDataGroup.pop(self.objectID)
         super().destroy()
-        GameObject.modelDataGroup.pop(self)
         
     def update(self):
         # self.debugDraw(RenderManager.renderManager.viewport)
-        GameObject.modelDataGroup[self]={
+        GameObject.modelDataGroup[self.objectID]={
             "name":"Player",
             "pos":self.body.position,
-            "angle":self.body.angle
+            "angle":self.body.angle,
+            "is_alive":self.isAlive
         }
         pass
     
@@ -327,6 +340,11 @@ class Player(GameObject):
         else:
             return self.cannonAngle  + math.degrees(self.body.angle)
         pass
+    
+    def playerDie(self):
+        self.health =0
+        self.isAlive = False
+        self.setDeathSprite()
     
     def getCannonDirection(self)->pg.Vector2:
         if(not self.isInverted):
@@ -379,7 +397,7 @@ class Projectile(GameObject):
             
         
         
-        GameObject.modelDataGroup[self]={
+        GameObject.modelDataGroup[self.objectID]={
             "name":"Projectile",
             "pos":self.body.position,
             "velocity":self.body.velocity,
@@ -403,7 +421,10 @@ class Projectile(GameObject):
         projectile.impactExplode()
         
         player:Player = arbiter.shapes[1].object
-        player.health -= 1
+        if(player.health>0):
+            player.health -= 1
+        if(player.health == 0):
+            player.playerDie()
         pass
     
     def projectileImpact(arbiter:pm.Arbiter,space:pm.Space,data)->bool:
@@ -420,11 +441,11 @@ class Projectile(GameObject):
         pass
     
     def impactExplode(self):
-        GameObject.modelDataGroup.pop(self)
         self.destroy()
         pass
     
     def destroy(self):
+        GameObject.modelDataGroup.pop(self.objectID)
         return super().destroy()
 
     def updateAngle(self):
@@ -435,7 +456,7 @@ class Projectile(GameObject):
         pass
     
     def update(self):
-        GameObject.modelDataGroup[self]={
+        GameObject.modelDataGroup[self.objectID]={
             "name":"Projectile",
             "pos":self.body.position,
             "velocity":self.body.velocity,
@@ -521,6 +542,10 @@ class GameModel:
         sprites = [
             {
                 "sprite":"tank",
+                "size":100
+            },
+            {
+                "sprite":"tank_destroyed",
                 "size":100
             },
             {
@@ -651,10 +676,10 @@ class ClientProjectile(ClientGameObject):
         return super().render(renderSurface,viewport,pos,angle)
     
 class ClientPlayer(ClientGameObject):
-    def __init__(self) -> None:
+    def __init__(self,sprite="tank") -> None:
         super().__init__()
         
-        self.sprites["tank"]=Sprite(ClientGameModel.assets["spriteAnims"]["tank"])
+        self.sprites["tank"]=Sprite(ClientGameModel.assets["spriteAnims"][sprite])
         pass
     
     def render(self, renderSurface: Surface, viewport, pos: pg.Vector2, angle: float):
@@ -684,6 +709,7 @@ class ClientGameModel:
     
         self.projectileSprite:ClientProjectile = ClientProjectile()
         self.playerSprite:ClientPlayer = ClientPlayer()
+        self.destroyedPlayerSprite:ClientPlayer = ClientPlayer("tank_destroyed")
     
         self.modelData = {}
     
@@ -696,6 +722,10 @@ class ClientGameModel:
         sprites = [
             {
                 "sprite":"tank",
+                "size":100
+            },
+            {
+                "sprite":"tank_destroyed",
                 "size":100
             },
             {
@@ -739,10 +769,8 @@ class ClientGameModel:
             ClientGameModel.assets["spriteAnims"][sprite["sprite"]]=anims
     
             
-    def render(self,camPos:tuple[float,float]):
+    def render(self):
         Animation.currentTick = pg.time.get_ticks()
-        
-        RenderManager.renderManager.viewport.setPosition(camPos)
         
         terrainRenderThread = threading.Thread(target=Terrain.Terrain.terrain.render,args=[self.renderSurface,self.viewport])
         terrainRenderThread.start()
@@ -758,7 +786,11 @@ class ClientGameModel:
     def renderGameModelData(self,gameModelData):
         for gameObject in gameModelData:
             if gameObject["name"]=="Player":
-                self.playerSprite.render(self.renderSurface,self.viewport,gameObject["pos"],gameObject["angle"])
+                if gameObject["is_alive"]:
+                    self.playerSprite.render(self.renderSurface,self.viewport,gameObject["pos"],gameObject["angle"])
+                else:
+                    self.destroyedPlayerSprite.render(self.renderSurface,self.viewport,gameObject["pos"],gameObject["angle"])
+                    
             elif gameObject["name"]=="Projectile":
                 self.projectileSprite.render(self.renderSurface,self.viewport,True,gameObject["pos"],gameObject["velocity"])
                 pass
