@@ -37,6 +37,7 @@ class Logic:
         self.screenControl = ScreenRenderControl()
         self.screenControl.addScreenByIndex(0,self.mainScreen)
         self.returnLogic = None
+        self.returnLogicParams = None
         pass
     
     def setup(self) -> None:
@@ -46,8 +47,8 @@ class Logic:
         self.screenControl.update()
         pass
     
-    def end(self) -> Logic:
-        return self.returnLogic
+    def end(self) -> tuple[Logic,list]:
+        return (self.returnLogic,self.returnLogicParams)
     
     def doQuitGame(self):
         self.isGameRunning = False

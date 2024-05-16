@@ -32,13 +32,11 @@ class ChatBox:
         
         
         self.sendButton:UIButton.UIButton = UIButton.UIButton(Textures.getLoadedSurfaces("blue_button00"),pg.rect.Rect(pg.Vector2(rect.left+0.8*rect.width,rect.top+0.8*rect.height),pg.Vector2(rect.width*0.2,rect.height*0.2)),"Send",15,True)
-        self.sendButton.setTriggerFunction(self.submitMessage)
         
         self.messageList:MessageList = messageList
         messageCoverSurf = pg.surface.Surface(pg.Vector2(50,50),pg.SRCALPHA, 32)
         messageCoverSurf.fill(pg.Color(100,100,100,70))
         self.messageListCover = UIObject.UISprite(messageCoverSurf,pg.rect.Rect(pg.Vector2(rect.topleft),pg.Vector2(rect.width,rect.height)),True)
-        self.user = "User1"
         
         self.numberOfVisibleMessages = 6
         self.messageDisplayTexts = []
@@ -48,15 +46,22 @@ class ChatBox:
             self.messageDisplayTexts.append(UIText.UIText(messageFont,"",pg.Vector2(rect.left,rect.top+0.12*rect.height*i),True))
         pass
     
-    def submitMessage(self)->None:
+    def submitMessage(self,playerName)->None:
         messageText = self.textInput.textInput.value
         if messageText!="":
-            message = Message(messageText,self.user)
+            message = Message(messageText,playerName)
             self.messageList.addMessage(message)
             
-            self.textInput.textInput.value = ""
+            self.clearInputValue()
             self.updateMessages()
+            
+    def clearInputValue(self):
+        self.signalClear = True
+        self.textInput.textInput.value = ""
         
+    def addMessage(self,playerName,message):
+        self.messageList.addMessage(Message(message,playerName))
+        self.updateMessages()
 
     def updateMessages(self)->None:
         lastMesssages = self.messageList.messages[-self.numberOfVisibleMessages:]
@@ -67,7 +72,6 @@ class ChatBox:
         self.messageListCover.update(drawSurface)
         self.textInputCover.update(drawSurface)
         
-        self.textInput.update(drawSurface)
         self.sendButton.update(drawSurface)
         for item in self.messageDisplayTexts:
             item.update(drawSurface)

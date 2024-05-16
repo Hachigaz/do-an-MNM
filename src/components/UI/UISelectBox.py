@@ -113,7 +113,6 @@ class UISelectBox(pg.sprite.Sprite):
             if(not item.is_selected and item.uiSurfaces[0].rect.collidepoint(pg.Vector2(pg.mouse.get_pos()))):
                 if(pg.mouse.get_pressed()[0]==1):
                     item.is_selected = True
-                    print(self.getSelectedValue())
                     for item2 in self.items:
                         if item2 != item:
                             item2.is_selected=False

@@ -16,12 +16,25 @@ class Game:
     def run(self)->None:
         self.setup()
         
-        self.startMenuLogic()
+        self.currentLogic = GameMenu.GameMenu
+        self.logicParams = None
+        while(self.currentLogic!=None):
+            if self.logicParams != None:
+                logic = self.currentLogic(*self.logicParams)
+            else:
+                logic = self.currentLogic()
+            logic.start()
+            logic.loop()
+            endLogic = logic.end()
+            self.currentLogic = endLogic[0]
+            self.logicParams=endLogic[1]
+            pass
                 
         self.endGame()
     
     def setup(self)->None:
-        screen:pg.Surface = pg.display.set_mode((1366, 768),pg.NOFRAME)
+        # screen:pg.Surface = pg.display.set_mode((1366, 768),pg.NOFRAME)
+        screen:pg.Surface = pg.display.set_mode((1366, 768))
         # screen:pg.Surface = pg.display.set_mode((1366, 768),pg.FULLSCREEN)
         # screen:pg.Surface = pg.display.set_mode((800, 600),pg.NOFRAME)
         # screen:pg.Surface = pg.display.set_mode((800, 600),pg.FULLSCREEN)
@@ -29,24 +42,6 @@ class Game:
         GameScreen.GameScreen.__setup__(screen)
         #load ui textures
         Textures.loadTextures()
-    
-    def startMenuLogic(self):
-        logic = GameMenu.GameMenu()
-        logic.start()
-        logic.loop()
-        returnLogic = logic.end()
-        
-        if not returnLogic == None:
-            self.startGameplayLogic()
-    
-    def startGameplayLogic(self):
-        logic = GameplayLogic.GameplayLogic()
-        logic.start()
-        logic.loop()
-        returnLogic = logic.end()
-        
-        if not returnLogic == None:
-            self.startMenuLogic()
     
     def endGame(self)->None:
         pg.quit()

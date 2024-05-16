@@ -153,8 +153,6 @@ class Sprite:
         pass
 
     def render(self,renderSurface:pg.surface.Surface,coord:pg.Vector2,angle):
-        
-        
         angle = math.degrees(-angle)
         surface:pg.surface.Surface = self.animations[self.currentAnimation].getTheFrameAndUpdate(self.isInverted)
         surface = pg.transform.rotate(surface,angle)
@@ -198,6 +196,8 @@ class Sprite:
 
 class GameObject(pg.sprite.Sprite):
     group:pg.sprite.Group = pg.sprite.Group()
+    
+    modelDataGroup:dict[str,dict[str,str]]={}
     def __init__(self, rect:pg.rect.Rect,collideBox:pg.rect.Rect,body:pm.body.Body = pm.Body(100,100000,pm.Body.DYNAMIC)) -> None:
         super().__init__()
         self.rect:pg.rect.Rect=rect
@@ -218,7 +218,6 @@ class GameObject(pg.sprite.Sprite):
         
         RenderManager.renderManager.addObject(self)
         self.group.add(self)
-        
 
     def invertSprites(self):
         self.isInverted = not self.isInverted
@@ -233,7 +232,7 @@ class GameObject(pg.sprite.Sprite):
     def destroy(self):
         RenderManager.renderManager.removeObject(self)
         PhysicSys.PhysicManager.physicManager.removeObject(self.body,self.poly)
-    
+        
 class Player(GameObject):
     def __init__(self, rect: Rect,healthCount:int) -> None:
         collideBox = pg.rect.Rect(0,0,75,65)
@@ -250,42 +249,15 @@ class Player(GameObject):
         
         
         self.poly.collision_type = 3
-        pass    
-    
-    # def isOnAir(self)->bool:
-    #     if self.object.body.velocity[1]<-10 or self.object.body.velocity[1]>10:
-    #         return True
-    #     else:
-    #         return False
-    
-    # def moveLeft(self):
-    #     self.isMoving = True
-    #     if(self.isInverted):
-    #         self.invertSprites()
-            
-    #     self.body.velocity = 40.0,self.body.velocity[1]
-
-    #     pass
-    
-    # def moveRight(self):
-    #     self.isMoving = True
-    #     if(not self.isInverted):
-    #         self.invertSprites()
-            
-    #     self.body.velocity = -40.0,self.body.velocity[1]
-    #     pass
-    
-    # def rotateCannonUp(self):
-    #     self.cannonAngle+=0.5
-    #     if(self.cannonAngle>70.0):
-    #         self.cannonAngle = 70.0
-    #     pass
-    
-    # def rotateCannonDown(self):
-    #     self.cannonAngle-=0.5
-    #     if(self.cannonAngle<0.0):
-    #         self.cannonAngle = 0.0
-    #     pass
+        
+        
+        
+        GameObject.modelDataGroup[self]={
+            "name":"Player",
+            "pos":self.body.position,
+            "angle":self.body.angle
+        }
+        pass
     
     def fireCannon(self):
         direction = self.getCannonDirection()
@@ -338,9 +310,15 @@ class Player(GameObject):
     def destroy(self):
         self.playerGroup.remove(self)
         super().destroy()
+        GameObject.modelDataGroup.pop(self)
         
     def update(self):
-        self.debugDraw(RenderManager.renderManager.viewport)
+        # self.debugDraw(RenderManager.renderManager.viewport)
+        GameObject.modelDataGroup[self]={
+            "name":"Player",
+            "pos":self.body.position,
+            "angle":self.body.angle
+        }
         pass
     
     def getCannonAngle(self)->float:
@@ -398,6 +376,15 @@ class Projectile(GameObject):
         self.hitCount = 5
         if(velocity[0]<0):
             self.invertSprites()
+            
+        
+        
+        GameObject.modelDataGroup[self]={
+            "name":"Projectile",
+            "pos":self.body.position,
+            "velocity":self.body.velocity,
+            "is_inverted":self.isInverted
+        }
     pass
 
     def wallImpact(arbiter:pm.Arbiter,space:pm.Space,data)->bool:
@@ -433,9 +420,12 @@ class Projectile(GameObject):
         pass
     
     def impactExplode(self):
+        GameObject.modelDataGroup.pop(self)
         self.destroy()
         pass
     
+    def destroy(self):
+        return super().destroy()
 
     def updateAngle(self):
         angle = math.atan2(self.body.velocity[1],self.body.velocity[0])
@@ -445,6 +435,12 @@ class Projectile(GameObject):
         pass
     
     def update(self):
+        GameObject.modelDataGroup[self]={
+            "name":"Projectile",
+            "pos":self.body.position,
+            "velocity":self.body.velocity,
+            "is_inverted":self.isInverted
+        }
         pass
     
     def render(self, renderSurface: Surface,viewport):
@@ -492,7 +488,7 @@ class GameModel:
     gameModel:GameModel = None
     assets:dict = {}
     
-    def __init__(self,game_setting,renderSurface:pg.surface.Surface,currentPlayer:int) -> None:
+    def __init__(self,game_setting,renderSurface:pg.surface.Surface) -> None:
         RenderManager.renderManager = RenderManager(renderSurface)
         PhysicSys.PhysicManager.physicManager = PhysicSys.PhysicManager()
         
@@ -501,14 +497,13 @@ class GameModel:
         PhysicSys.PhysicManager.physicManager.projToProjImp.post_solve = Projectile.projectileImpact
         
         self.renderSurface:pg.surface.Surface = renderSurface
-        self.currentPlayer:int = currentPlayer
         
 
         self.loadMap()
         
         self.objectUpdateGroups:list[pg.sprite.Group]=[Player.group,Projectile.group]
         
-        self.players:list[Player]=[]
+        self.players:dict[tuple[str,int],Player]={}
         self.game_setting = game_setting
         self.loadAssets()
         self.projectiles = []
@@ -568,9 +563,9 @@ class GameModel:
             
             GameModel.assets["spriteAnims"][sprite["sprite"]]=anims
             
-        for i in range(self.game_setting["player_count"]):
+        for ip,playerName in self.game_setting["player_list"].items():
             player = Player(pg.rect.Rect(200,100,100,100/2),self.game_setting["health_count"])
-            self.players.append(player)
+            self.players[ip] = player
     
     def loadMap(self):
         # groundSurf = pg.surface.Surface(pg.Vector2(10,10))
@@ -587,28 +582,34 @@ class GameModel:
         # self.groundSurface = CollideSurface(groundSurf,pg.rect.Rect(1000,300,300,500))
         pass
     
+    def updateObjectGroups(self):
+        for group in self.objectUpdateGroups:
+            for object in group:
+                object.update()
+    
     def update(self):
         # PhysicSys.PhysicManager.physicManager.debugUpdate(self.renderSurface)
         PhysicSys.PhysicManager.physicManager.update()
+        
+        objectDataUpdateThread = threading.Thread(target=self.updateObjectGroups)
+        objectDataUpdateThread.start()
         
         terrainUpdateThread = threading.Thread(target=Terrain.Terrain.terrain.update)
         terrainUpdateThread.start()
         
         Animation.currentTick = pg.time.get_ticks()
         
-        for group in self.objectUpdateGroups:
-            for object in group:
-                object.update()
-            
-            
+        
 
+        objectDataUpdateThread.join()
         terrainUpdateThread.join()
         
-        for player in self.players:
-            player.isMoving = False
+    def getGameModelData(self):
+        return list(GameObject.modelDataGroup.values())
+        
             
-    def render(self):
-        RenderManager.renderManager.viewport.setPosition(self.players[self.currentPlayer].body.position)
+    def render(self,currentPlayer):
+        RenderManager.renderManager.viewport.setPosition(self.players[currentPlayer].body.position)
         
         terrainRenderThread = threading.Thread(target=Terrain.Terrain.terrain.render,args=[self.renderSurface,RenderManager.renderManager.viewport])
         terrainRenderThread.start()
@@ -618,4 +619,146 @@ class GameModel:
         terrainRenderThread.join()
         
     def getPlayerHealth(self,player):
-        self.currentPlayer
+        pass
+    
+class ClientGameObject(pg.sprite.Sprite):
+    def __init__(self) -> None:
+        self.sprites:dict[Sprite] = {}
+        
+        self.isInverted:bool = False
+
+    def render(self,renderSurface:pg.surface.Surface,viewport,pos:pg.Vector2,angle:float):
+        for key,sprite in self.sprites.items():
+            sprite.render(renderSurface,pg.Vector2((pos.x - viewport.pos[0],pos.y-viewport.pos[1])),angle)
+        pass
+    
+    
+class ClientProjectile(ClientGameObject):
+    def __init__(self) -> None:
+        super().__init__()
+        self.sprites["projectile"] = Sprite(ClientGameModel.assets["spriteAnims"]["projectile"])
+    pass
+    
+
+    def updateAngle(self,isInverted,velocity)->float:
+        angle = math.atan2(velocity[1],velocity[0])
+        if(isInverted):
+            angle = angle - math.radians(180)
+        return angle
+    
+    def render(self, renderSurface: Surface,viewport,isInverted,pos,velocity):
+        angle = self.updateAngle(isInverted,velocity)
+        return super().render(renderSurface,viewport,pos,angle)
+    
+class ClientPlayer(ClientGameObject):
+    def __init__(self) -> None:
+        super().__init__()
+        
+        self.sprites["tank"]=Sprite(ClientGameModel.assets["spriteAnims"]["tank"])
+        pass
+    
+    def render(self, renderSurface: Surface, viewport, pos: pg.Vector2, angle: float):
+        return super().render(renderSurface, viewport, pos, angle)
+    pass
+
+class ClientGameModel:
+    gameModel:GameModel = None
+    assets:dict = {}
+    
+    def __init__(self,renderSurface:pg.surface.Surface) -> None:
+        
+        RenderManager.renderManager = RenderManager(renderSurface)
+        PhysicSys.PhysicManager.physicManager = PhysicSys.PhysicManager()
+        
+        self.renderSurface:pg.surface.Surface = renderSurface
+        
+        
+        self.players:dict[tuple[str,int],Player]={}
+        self.loadAssets()
+        self.projectiles = []
+        self.viewport:RenderManager.Viewport = RenderManager.Viewport((self.renderSurface.get_width(),self.renderSurface.get_height()),(2500,1500))
+
+        Terrain.Terrain.terrain = Terrain.Terrain()
+        Terrain.Terrain.terrain.start()
+        pass
+    
+        self.projectileSprite:ClientProjectile = ClientProjectile()
+        self.playerSprite:ClientPlayer = ClientPlayer()
+    
+        self.modelData = {}
+    
+    def start(self):
+        pass
+    
+    def loadAssets(self):
+
+        loadPath = "resources/tank_sprites/"
+        sprites = [
+            {
+                "sprite":"tank",
+                "size":100
+            },
+            {
+                "sprite":"projectile",
+                "size":20
+            }
+        ]
+        ClientGameModel.assets["spriteAnims"]={}
+        
+        for sprite in sprites:
+            print(f"loading sprite: {sprite['sprite']}:")
+            tree:xmlET.ElementTree = xmlET.parse(loadPath+sprite['sprite']+"/data.xml")
+            root:xmlET.Element = tree.getroot()
+            characterTree = root[0]
+            
+            anims:dict[Animation] = {}
+            
+            for subAnim in characterTree:
+                print(f"loading animation: {subAnim.attrib['animation_name']}")
+                
+                animName = subAnim.attrib["animation_name"]
+                texName = subAnim.attrib["name"]
+                texOffset = pg.Vector2(float(subAnim.attrib["x"]),float(subAnim.attrib["y"]))
+                texSize = pg.Vector2(float(subAnim.attrib["width"]),float(subAnim.attrib["height"]))
+                texCount = int(subAnim.attrib["anim-count"])
+                
+                
+                transitionTimes : list[float] = []
+                for animFrame in subAnim:
+                    transitionTimes.append(float(animFrame.attrib["transition-time"]))
+                
+                
+                surfAspectRatio = (texSize.x/texCount)/texSize.y
+                preferedSize = pg.Vector2(sprite["size"],sprite["size"]/surfAspectRatio)
+                
+                animSurf = pg.image.load(loadPath+sprite["sprite"]+"/"+texName)
+                # animSurf.fill(pg.Color(255,255,255,255))
+                animation = Animation(animSurf,texCount,pg.Vector2(texSize.x/texCount,texSize.y),pg.rect.Rect(0,0,preferedSize.x,preferedSize.y),transitionTimes)
+                anims[animName]=animation
+            
+            ClientGameModel.assets["spriteAnims"][sprite["sprite"]]=anims
+    
+            
+    def render(self,camPos:tuple[float,float]):
+        Animation.currentTick = pg.time.get_ticks()
+        
+        RenderManager.renderManager.viewport.setPosition(camPos)
+        
+        terrainRenderThread = threading.Thread(target=Terrain.Terrain.terrain.render,args=[self.renderSurface,self.viewport])
+        terrainRenderThread.start()
+        
+        terrainRenderThread.join()
+        
+    def getPlayerHealth(self,player):
+        pass
+    
+    def updateViewportPosition(self,pos:tuple[int,int]):
+        self.viewport.setPosition(pos)
+    
+    def renderGameModelData(self,gameModelData):
+        for gameObject in gameModelData:
+            if gameObject["name"]=="Player":
+                self.playerSprite.render(self.renderSurface,self.viewport,gameObject["pos"],gameObject["angle"])
+            elif gameObject["name"]=="Projectile":
+                self.projectileSprite.render(self.renderSurface,self.viewport,True,gameObject["pos"],gameObject["velocity"])
+                pass

@@ -4,6 +4,8 @@ import components.UI.UIObject as UIObject
 
 import components.borrowed.pygame_textinput as TextInput
 
+import threading
+
 class UITextInput (UIObject.UIObject):
     def __init__(self,rect:pg.rect.Rect, initText:str, validatorFunc, fontSize:int,is_clickable:bool = False) -> None:
         super().__init__()
@@ -33,6 +35,8 @@ class UITextInput (UIObject.UIObject):
         self.isInputEnabled = False
     
     def update(self, drawSurface: pg.Surface) -> None:
+        inputUpdateThread = threading.Thread(target=self.updateInput)
+        inputUpdateThread.start()
         drawSurface.blit(self.textInputOverlay,self.rect.topleft)
         if(self.is_clickable):
             if pg.mouse.get_pressed()[0]==1:
@@ -42,10 +46,14 @@ class UITextInput (UIObject.UIObject):
                     self.disableInput()
         
         self.uiSurfaces[0].surface = self.textInput.surface
-        if(self.isInputEnabled == True):
-            self.textInput.update(pg.event.get())
     
         super().update(drawSurface)
+        inputUpdateThread.join()
+        
+    def updateInput(self):
+        if(self.isInputEnabled == True):
+            self.textInput.update(pg.event.get())
+        
         
     def disableInput(self) -> None:
         self.isInputEnabled = False

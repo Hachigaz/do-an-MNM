@@ -225,8 +225,6 @@ class Terrain:
             }
         ]
         
-        print(map)
-        
         for rect in map:       
             TerrainManager.terrainManager.addFragment(Fragment(rect["rect"],rect["pos"]))
             
@@ -237,10 +235,10 @@ class Terrain:
         pass
     
     def update(self):
-        mousePos = pg.mouse.get_pos()
+        # mousePos = pg.mouse.get_pos()
         
-        if pg.mouse.get_pressed()[0] :
-            self.processCutTerrain(self.selectedCursor,mousePos)
+        # if pg.mouse.get_pressed()[0] :
+        #     self.processCutTerrain(self.selectedCursor,mousePos)
         # if pg.mouse.get_pressed()[2] :
         #     self.changeFragBodyType(self.selectedCursor,mousePos)
         
@@ -249,8 +247,8 @@ class Terrain:
         pass
     
     def render(self,screenSurf:pg.surface.Surface,viewport):
-        mousePos = pg.mouse.get_pos()
-        pg.draw.lines(screenSurf,pg.color.Color(0,0,255,255),True,[(p[0]+mousePos[0],p[1]+mousePos[1]) for p in self.selectedCursor],1)
+        # mousePos = pg.mouse.get_pos()
+        # pg.draw.lines(screenSurf,pg.color.Color(0,0,255,255),True,[(p[0]+mousePos[0],p[1]+mousePos[1]) for p in self.selectedCursor],1)
         
         TerrainManager.terrainManager.render(screenSurf,viewport)
     

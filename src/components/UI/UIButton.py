@@ -54,7 +54,7 @@ class UIButton(UIObject.UIObject):
                     if self.params==None:
                         self.trigger_func()
                     else:
-                        self.trigger_func(self.params)
+                        self.trigger_func(*self.params)
         else:
             for sprite in self.disabledEffects:
                 sprite.draw(drawSurface)
