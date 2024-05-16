@@ -35,6 +35,7 @@ class Game:
     def setup(self)->None:
         # screen:pg.Surface = pg.display.set_mode((1366, 768),pg.NOFRAME)
         screen:pg.Surface = pg.display.set_mode((1366, 768))
+        pg.display.set_icon(pg.image.load("resources/tank_sprites/tank/tank_idle.webp"))
         # screen:pg.Surface = pg.display.set_mode((1366, 768),pg.FULLSCREEN)
         # screen:pg.Surface = pg.display.set_mode((800, 600),pg.NOFRAME)
         # screen:pg.Surface = pg.display.set_mode((800, 600),pg.FULLSCREEN)
