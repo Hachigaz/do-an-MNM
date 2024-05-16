@@ -27,7 +27,7 @@ class MapIcon:
         pass
     pass
 class MapDisplay:
-    def __init__(self,playerCount:int,screenSize:pg.Vector2,mapRange:pg.rect.Rect) -> None:
+    def __init__(self,playerCount:int,screenSize:pg.Vector2,mapRange:pg.rect.Rect,currentPlayerIndex) -> None:
         self.playerCount:int = playerCount
         self.mapSize:pg.Vector2 = pg.Vector2(250,250*mapRange.height/mapRange.width)
         self.mapPos:pg.Vector2 = screenSize-self.mapSize
@@ -38,7 +38,10 @@ class MapDisplay:
         
         self.playerIcons:list[MapIcon] = []
         for i in range(self.playerCount):
-            self.playerIcons.append(MapIcon(pg.transform.scale(pg.image.load("resources/img/ship_icon.png"),(30,30)),self))
+            if(i!= currentPlayerIndex):
+                self.playerIcons.append(MapIcon(pg.transform.scale(pg.image.load("resources/img/enemy_ship_icon.png"),(30,30)),self))            
+            else:
+                self.playerIcons.append(MapIcon(pg.transform.scale(pg.image.load("resources/img/player_ship_icon.png"),(30,30)),self))            
         pass
     
     def update(self,playerPos:list[tuple[float,float]]):
