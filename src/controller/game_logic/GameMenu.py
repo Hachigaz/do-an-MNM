@@ -47,11 +47,13 @@ class GameMenu (Logic.Logic):
         self.browseServerScreen = BrowseServerScreen.BrowseServerScreen()
         self.browseServerScreen.backBtn.setTriggerFunction(self.backToMultiplayer)
         self.browseServerScreen.refreshBtn.setTriggerFunction(self.findHost)
+        self.browseServerScreen.joinSelectedBtn.setTriggerFunction(self.joinSelected)
 
         self.joinByIPScreen = JoinByIPScreen.JoinByIPScreen()
         self.joinByIPScreen.connectBtn.setTriggerFunction(self.connectByIp)
         self.joinByIPScreen.backBtn.setTriggerFunction(self.backToMultiplayer)
         
+        self.browseButtonLocked = False
         self.nextLogic:Logic = None
         pass
         
@@ -80,9 +82,6 @@ class GameMenu (Logic.Logic):
         pass
     
     #browse
-    
-    def joinLobby(self):
-        pass
     
     def refreshServers(self)->None:
         pass
@@ -267,24 +266,72 @@ class GameMenu (Logic.Logic):
 
     def receiveHost(self):
         startTime = pg.time.get_ticks()
-        while pg.time.get_ticks() - startTime < 3000:
-            message = pickle.dumps(self.UDPSocket.recv(4096))
-            print("client received host from host")
-            ipaddress = message["ip_address"]
-            print("received host from",ipaddress)
-        print("end client receiving host")
+        while pg.time.get_ticks() - startTime < 1000:
+            try:
+                message = pickle.loads(self.UDPSocket.recv(4096))
+                ip = (message["ip_address"],message["port"])
+                playerName = message["player_name"]
+                data = {"ip_address":ip,"player_name":playerName}
+                if not data in self.hostList:
+                    self.hostList.append(data)
+                pass
+            except Exception as e:
+                print("receivedHost Exception: ",e)
+        self.browseServerScreen.serverListTable.updateTable(self.hostList)
+        print("got:",self.hostList)
+        self.browseButtonLocked = False
         pass
+        
 
     def findHost(self):
-        print("started receiving host")
-        self.MCAST_GRP = '224.1.1.1'
-        self.MCAST_PORT = 22705
-        
-        MULTICAST_TTL = 2
+        if not self.browseButtonLocked:
+            self.browseButtonLocked = True
+            self.hostList = []
+            self.MCAST_GRP = '224.1.1.1'
+            self.MCAST_PORT = 22705
+            
+            MULTICAST_TTL = 2
 
-        self.UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.UDPSocket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MULTICAST_TTL)
-        self.UDPSocket.sendto(pickle.dumps({"message":"host_find"}), (self.MCAST_GRP, self.MCAST_PORT))
-        self.UDPSocket.settimeout(3000)
-        hostReceiveThread = threading.Thread(target=self.receiveHost)
-        hostReceiveThread.start()
+            self.UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            self.UDPSocket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MULTICAST_TTL)
+            self.UDPSocket.sendto(pickle.dumps({"message":"host_find"}), (self.MCAST_GRP, self.MCAST_PORT))
+            self.UDPSocket.settimeout(0.2)
+            hostReceiveThread = threading.Thread(target=self.receiveHost)
+            hostReceiveThread.start()
+            
+    def joinSelected(self):
+        playerName = self.browseServerScreen.playerNameInput.textInput.value
+        
+        if playerName == "":
+            dialog = Dialog.Dialog("Enter player name",pg.Vector2(self.windowSurface.get_width()*0.6,300))
+            self.screenControl.addScreenByIndex(1,dialog)
+            self.screenControl.currentScreens[0].disableUI()
+            self.browseServerScreen.playerNameInput.textInput.is_clickable = False
+            
+            params = [
+            dialog,
+            [
+                self.browseServerScreen.playerNameInput.textInput
+            ]
+            ]
+            dialog.confirmButton.setTriggerFunction(self.closeDialog,params)
+            return
+        
+        currentSelected = self.browseServerScreen.serverListTable.currentSelected
+        if currentSelected != None:
+            selectedHost = self.hostList[currentSelected]
+            self.connectToServer(selectedHost["ip_address"][0],selectedHost["ip_address"][1],playerName)
+        else:
+            dialog = Dialog.Dialog("Select a server",pg.Vector2(self.windowSurface.get_width()*0.6,300))
+            self.screenControl.addScreenByIndex(1,dialog)
+            self.screenControl.currentScreens[0].disableUI()
+            self.browseServerScreen.playerNameInput.textInput.is_clickable = False
+            
+            params = [
+            dialog,
+            [
+                self.browseServerScreen.playerNameInput.textInput
+            ]
+            ]
+            dialog.confirmButton.setTriggerFunction(self.closeDialog,params)
+            return

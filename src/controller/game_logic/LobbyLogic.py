@@ -135,18 +135,18 @@ class HostLobbyLogic(Logic.Logic):
         self.hostFindThread.start()
 
     def receiveHostFindMessage(self):
-        print("started host receiving host")
         self.isReceivingHostFind = True
         while self.isReceivingHostFind:
-            data = pickle.loads(self.UDPSocket.recv(4096))
-            print("received host find host")
-            print("received message from ",data)
+            data,ip = self.UDPSocket.recvfrom(4096)
+            data = pickle.loads(data)
             if data["message"]=="host_find":
                 response = {
                     "message":"host_find_res",
-                    "ip_address":self.hostSocket.getsockname()
+                    "ip_address":socket.gethostbyname(socket.gethostname()),
+                    "port":self.portNumber,
+                    "player_name":self.playerName
                 }
-                self.UDPSocket.sendto((self.pickle(response),ip))
+                self.UDPSocket.sendto(pickle.dumps(response),ip)
         pass
 
     def returnToMainMenu(self)->None:
