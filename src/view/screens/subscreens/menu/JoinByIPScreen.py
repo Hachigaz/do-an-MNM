@@ -25,7 +25,8 @@ class JoinByIPScreen(GameScreen.GameScreen):
         
         self.IPInputLabel = UIText.UIText(pg.font.Font("resources/ui/Font/kenvector_future.ttf",20),"IP",self.inputPos + pg.Vector2(10,10),True)
         self.uiGroup.add(self.IPInputLabel)
-        self.IPInput = UITextInput.UITextInput(pg.rect.Rect(self.inputPos + pg.Vector2(10,55),(300,0)),"172.20.10.3",None,20,True)
+        #CHANGE DEFAULT IP
+        self.IPInput = UITextInput.UITextInput(pg.rect.Rect(self.inputPos + pg.Vector2(10,55),(300,0)),"192.168.39.82",None,20,True)
         self.uiGroup.add(self.IPInput)
         
         self.portTextInputLabel = UIText.UIText(pg.font.Font("resources/ui/Font/kenvector_future.ttf",20),"Port",self.inputPos + pg.Vector2(10,115),True)
