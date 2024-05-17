@@ -251,7 +251,7 @@ class HostLogic(Logic.Logic):
             self.currentPlayer.brake()
             
         if(keys[pg.K_SPACE]):
-                self.currentPlayer.fireCannon()
+            self.currentPlayer.fireCannon()
             
         pass
             

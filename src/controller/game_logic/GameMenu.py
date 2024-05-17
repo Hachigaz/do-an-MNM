@@ -16,6 +16,8 @@ import view.screens.subscreens.dialog.dialog as Dialog
 import pygame as pg
 import socket
 import ipaddress
+import pickle
+import threading
 
 class GameMenu (Logic.Logic):
     def __init__(self) -> None:
@@ -44,6 +46,7 @@ class GameMenu (Logic.Logic):
         
         self.browseServerScreen = BrowseServerScreen.BrowseServerScreen()
         self.browseServerScreen.backBtn.setTriggerFunction(self.backToMultiplayer)
+        self.browseServerScreen.refreshBtn.setTriggerFunction(self.findHost)
 
         self.joinByIPScreen = JoinByIPScreen.JoinByIPScreen()
         self.joinByIPScreen.connectBtn.setTriggerFunction(self.connectByIp)
@@ -261,3 +264,27 @@ class GameMenu (Logic.Logic):
         self.returnLogic = LobbyLogic.ClientLobbyLogic
         self.returnLogicParams = [playerName,port,clientSocket]
         pass
+
+    def receiveHost(self):
+        startTime = pg.time.get_ticks()
+        while pg.time.get_ticks() - startTime < 3000:
+            message = pickle.dumps(self.UDPSocket.recv(4096))
+            print("client received host from host")
+            ipaddress = message["ip_address"]
+            print("received host from",ipaddress)
+        print("end client receiving host")
+        pass
+
+    def findHost(self):
+        print("started receiving host")
+        self.MCAST_GRP = '224.1.1.1'
+        self.MCAST_PORT = 22705
+        
+        MULTICAST_TTL = 2
+
+        self.UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.UDPSocket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, MULTICAST_TTL)
+        self.UDPSocket.sendto(pickle.dumps({"message":"host_find"}), (self.MCAST_GRP, self.MCAST_PORT))
+        self.UDPSocket.settimeout(3000)
+        hostReceiveThread = threading.Thread(target=self.receiveHost)
+        hostReceiveThread.start()

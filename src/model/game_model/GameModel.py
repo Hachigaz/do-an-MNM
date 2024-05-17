@@ -25,6 +25,12 @@ class AnimationFrame:
         self.isLockedFrame:bool = False
         pass
 
+class Effect:
+    def __init__(self,sprite:Sprite) -> None:
+        self.sprite:Sprite=sprite
+
+        pass
+
 class Animation:
     currentTick: int
     def __init__(self,frameSurface:pg.surface.Surface,animCount:int,frameSize:pg.Vector2,rect:pg.rect.Rect, transitionTimes:list[float]) -> None:
@@ -792,5 +798,5 @@ class ClientGameModel:
                     self.destroyedPlayerSprite.render(self.renderSurface,self.viewport,gameObject["pos"],gameObject["angle"])
                     
             elif gameObject["name"]=="Projectile":
-                self.projectileSprite.render(self.renderSurface,self.viewport,True,gameObject["pos"],gameObject["velocity"])
+                self.projectileSprite.render(self.renderSurface,self.viewport,False,gameObject["pos"],gameObject["velocity"])
                 pass

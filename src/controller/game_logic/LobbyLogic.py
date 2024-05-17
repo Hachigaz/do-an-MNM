@@ -7,6 +7,7 @@ import view.screens.Lobby.LobbyScreen as LobbyScreen
 import socket as socket
 import pickle
 import threading
+import struct
 
 import pygame as pg
 import view.screens.subscreens.dialog.dialog as Dialog
@@ -111,6 +112,42 @@ class HostLobbyLogic(Logic.Logic):
         self.startClientHandler()
         
         print("started hosting on ",self.hostSocket)
+
+
+        MCAST_GRP = '224.1.1.1'
+        MCAST_PORT = 22705
+
+        IS_ALL_GROUPS = True
+
+        self.UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.UDPSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if IS_ALL_GROUPS:
+            # on this port, receives ALL multicast groups
+            self.UDPSocket.bind(('', MCAST_PORT))
+        else:
+            # on this port, listen ONLY to MCAST_GRP
+            self.UDPSocket((MCAST_GRP, MCAST_PORT))
+        mreq = struct.pack("4sl", socket.inet_aton(MCAST_GRP), socket.INADDR_ANY)
+
+        self.UDPSocket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+
+        self.hostFindThread = threading.Thread(target=self.receiveHostFindMessage)
+        self.hostFindThread.start()
+
+    def receiveHostFindMessage(self):
+        print("started host receiving host")
+        self.isReceivingHostFind = True
+        while self.isReceivingHostFind:
+            data = pickle.loads(self.UDPSocket.recv(4096))
+            print("received host find host")
+            print("received message from ",data)
+            if data["message"]=="host_find":
+                response = {
+                    "message":"host_find_res",
+                    "ip_address":self.hostSocket.getsockname()
+                }
+                self.UDPSocket.sendto((self.pickle(response),ip))
+        pass
 
     def returnToMainMenu(self)->None:
         self.isLogicRunning = False
@@ -278,6 +315,7 @@ class HostLobbyLogic(Logic.Logic):
         socketUpdateThread.join()
     
     def end(self) -> tuple[Logic.Logic, list]:
+        self.isReceivingHostFind = False
         self.isHandlingClients = False
         self.clientHandlerThread.join()
         if not self.isGameStarting:
