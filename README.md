@@ -52,4 +52,5 @@ The game has a simple text chatbox in the game lobby for messaging with your fri
 ###
 The game is poorly optimized so it might run slow on some devices.
 ###
-project report
+Project report:
+[bao_cao_do_an.pdf](https://github.com/Hachigaz/do-an-MNM/files/15342206/bao_cao_do_an.pdf)
