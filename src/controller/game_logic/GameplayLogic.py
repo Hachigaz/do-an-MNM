@@ -487,7 +487,7 @@ class ClientLogic(Logic.Logic):
     #     pass
     
     def updateGameModel(self):
-        data = pickle.loads(self.clientSocket.recv(4096))
+        data = pickle.loads(self.clientSocket.recv(8192))
         if data["proc"]!="MyPythonGame":
             isHandlingConnection=False
             print("Error handling")
