@@ -270,7 +270,7 @@ class Player(GameObject):
             if(pg.time.get_ticks() - self.lastFired > 1000):
                 self.lastFired = pg.time.get_ticks()
                 direction = self.getCannonDirection()
-                offset = 50
+                offset = 70
                 velocity = self.firingPower*10
                 finalOffset = (self.body.position[0] + offset*direction.x,self.body.position[1]+ offset*direction.y)
                 finalVelocity = (velocity*direction.x,velocity*direction.y)

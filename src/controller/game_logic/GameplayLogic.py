@@ -396,6 +396,8 @@ class HostLogic(Logic.Logic):
                     isHandlingConnection = False
             except socket.timeout as e:
                 pass
+            except pickle.UnpicklingError:
+                pass
             except Exception as e:
                 print("EXCEPTION:", e)
                 isHandlingConnection = False
@@ -487,7 +489,7 @@ class ClientLogic(Logic.Logic):
     #     pass
     
     def updateGameModel(self):
-        data = pickle.loads(self.clientSocket.recv(8192))
+        data = pickle.loads(self.clientSocket.recv(4096))
         if data["proc"]!="MyPythonGame":
             isHandlingConnection=False
             print("Error handling")
