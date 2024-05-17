@@ -330,7 +330,7 @@ class HostLogic(Logic.Logic):
         self.screenControl.currentScreens[0].disableUI()
         
         params = [
-        dialog
+        
         ]
         dialog.confirmButton.setTriggerFunction(self.returnToMainMenu,params)
         pass
@@ -341,7 +341,7 @@ class HostLogic(Logic.Logic):
         self.screenControl.currentScreens[0].disableUI()
         
         params = [
-        dialog
+        
         ]
         dialog.confirmButton.setTriggerFunction(self.returnToMainMenu,params)
         pass
@@ -569,7 +569,7 @@ class ClientLogic(Logic.Logic):
         self.screenControl.currentScreens[0].disableUI()
         
         params = [
-        dialog
+        
         ]
         dialog.confirmButton.setTriggerFunction(self.returnToMainMenu,params)
         pass
@@ -580,7 +580,7 @@ class ClientLogic(Logic.Logic):
         self.screenControl.currentScreens[0].disableUI()
         
         params = [
-        dialog
+        
         ]
         dialog.confirmButton.setTriggerFunction(self.returnToMainMenu,params)
         pass
@@ -602,7 +602,7 @@ class ClientLogic(Logic.Logic):
         self.screenControl.currentScreens[0].disableUI()
         
         params = [
-        dialog
+        
         ]
         dialog.confirmButton.setTriggerFunction(self.returnToMainMenu,params)
         pass
