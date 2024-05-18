@@ -148,6 +148,7 @@ class HostLobbyLogic(Logic.Logic):
                 }
                 print("got address",ip)
                 self.UDPSocket.sendto(pickle.dumps(response),ip)
+
         pass
 
     def returnToMainMenu(self)->None:

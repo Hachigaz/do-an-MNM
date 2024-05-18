@@ -287,7 +287,7 @@ class GameMenu (Logic.Logic):
         if not self.browseButtonLocked:
             self.browseButtonLocked = True
             self.hostList = []
-            self.MCAST_GRP = '224.1.1.1'
+            self.MCAST_GRP = ''
             self.MCAST_PORT = 22705
             
             MULTICAST_TTL = 2
