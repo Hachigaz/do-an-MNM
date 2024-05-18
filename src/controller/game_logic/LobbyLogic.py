@@ -146,6 +146,7 @@ class HostLobbyLogic(Logic.Logic):
                     "port":self.portNumber,
                     "player_name":self.playerName
                 }
+                print("got address",ip)
                 self.UDPSocket.sendto(pickle.dumps(response),ip)
         pass
 
