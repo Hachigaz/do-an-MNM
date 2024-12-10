@@ -6,7 +6,7 @@
 
 fly war is a simple game created using Python, with the use of additional libraries such as Pygame for GUI rendering, Pymunk for physics simulation, Shapely for presenting geometric shapes for rendering, and Python Socket for networking.
 ###
-The game is multiplayer only, and more than five players can join the game.
+The game is multiplayer only, and more than two players can join the game.
 ##
 
 ## Gameplay
