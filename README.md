@@ -1,4 +1,4 @@
-# fly war - A local online game created using Python
+# fly war - A LAN-based multiplayer game created using Python
 ![image](https://github.com/Hachigaz/do-an-MNM/assets/58378033/f14da737-1ea7-4ace-aad2-7a4d218ad464)
 
 ## Overview
